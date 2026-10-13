@@ -1,0 +1,24 @@
+
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+
+metadata:
+  name: redis-observability-test
+  namespace: redis-observability
+
+  labels:
+    app.kubernetes.io/part-of: redis-observability
+
+spec:
+  scrapeInterval: 30s
+  metricsPath: /metrics
+
+  staticConfigs:
+    - targets:
+        - monitoring-kube-state-metrics.monitoring.svc.cluster.local:8080
+
+      labels:
+        environment: local
+        project: aws-redis-observability
+        discovery_type: test
+        test_target: kube-state-metrics
