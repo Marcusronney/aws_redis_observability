@@ -39,7 +39,8 @@ alertmanager:
 kubeEtcd:
   enabled: false
 
-kubeControllerManager: false
+kubeControllerManager:
+  enable: false
 
 kubeScheduler:
   enabled: false
