@@ -1,0 +1,45 @@
+# AWS Redis Observabilidade
+# Ambiente: Local Kind
+
+grafana:
+  enabled: true
+  persistence:
+    enabled: false
+
+  service:
+    type: ClusterIP
+
+
+
+prometheus:
+  enable: true
+  prometheusSpec:
+    retention: 3d
+    scrapeInterval: 30s
+    evaluationInterval: 30s
+
+    # Selecionando apenas os ScrapeCOnfigs
+    scrapeConfigSelector:
+      matchLabels:
+        app.kubernetes.io/part-of: redis-observability
+
+    
+    # Apenas Namespaces autorizados
+    scrapeConfigNamespaceSelector:
+      matchLabels:
+        monitoring: redis-observability
+
+    
+    storageSpec: {}
+
+alertmanager:
+  enable: false
+
+# Desabilitados no Kind
+kubeEtcd:
+  enabled: false
+
+kubeControllerManager: false
+
+kubeScheduler:
+  enabled: false
