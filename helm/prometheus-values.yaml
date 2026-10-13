@@ -1,0 +1,33 @@
+grafana:
+  enabled: true
+
+  persistence:
+    enabled: false
+
+alertmanager:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    retention: 3d
+
+    scrapeConfigSelectorNilUsesHelmValues: false
+
+    scrapeConfigSelector:
+      matchLabels:
+        app.kubernetes.io/part-of: redis-observability
+
+    scrapeConfigNamespaceSelector:
+      matchLabels:
+        monitoring: redis-observability
+
+    storageSpec: {}
+
+kubeEtcd:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
