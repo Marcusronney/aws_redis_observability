@@ -15,6 +15,7 @@ resource "kubernetes_cron_job_v1" "redis_discovery" {
     starting_deadline_seconds     = 45
     successful_jobs_history_limit = 3
     failed_jobs_history_limit     = 5
+    suspend = true
 
     job_template {
       metadata {
