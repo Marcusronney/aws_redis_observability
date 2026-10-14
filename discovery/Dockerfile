@@ -15,7 +15,10 @@ RUN pip install --no-cache-dir \
 
 COPY discovery/main.py /app/discovery/main.py
 
-RUN mkdir -p /app/discovery/config
+RUN mkdir -p /app/discovery/config \
+    && chmod 755 /app /app/discovery /app/discovery/config \
+    && chmod 644 /app/discovery/main.py \
+                 /app/discovery/requirements.txt
 
 USER 10001:10001
 

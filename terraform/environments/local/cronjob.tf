@@ -40,6 +40,7 @@ resource "kubernetes_cron_job_v1" "redis_discovery" {
             automount_service_account_token = true
 
             restart_policy = "Never"
+            
 
             security_context {
               run_as_non_root = true
@@ -49,7 +50,7 @@ resource "kubernetes_cron_job_v1" "redis_discovery" {
 
             container {
               name              = "discovery"
-              image             = "redis-discovery:local-v1"
+              image             = "redis-discovery:local-v2"
               image_pull_policy = "IfNotPresent"
 
               command = [
