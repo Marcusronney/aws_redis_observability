@@ -1,0 +1,66 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-auth
+  namespace: redis-observability
+  labels:
+    app: redis-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-auth
+  template:
+    metadata:
+      labels:
+        app: redis-auth
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.4-alpine
+          command:
+            - redis-server
+            - --aclfile
+            - /etc/redis/users.acl
+            - --appendonly
+            - "no"
+            - --save
+            - ""
+          ports:
+            - name: redis
+              containerPort: 6379
+          volumeMounts:
+            - name: redis-acl
+              mountPath: /etc/redis
+              readOnly: true
+          readinessProbe:
+            tcpSocket:
+              port: redis
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+      volumes:
+        - name: redis-acl
+          secret:
+            secretName: redis-lab-auth
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-auth
+  namespace: redis-observability
+spec:
+  selector:
+    app: redis-auth
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+  type: ClusterIP

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-noauth
+  namespace: redis-observability
+  labels:
+    app: redis-noauth
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-noauth
+  template:
+    metadata:
+      labels:
+        app: redis-noauth
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.4-alpine
+          command:
+            - redis-server
+            - --appendonly
+            - "no"
+            - --save
+            - ""
+      ports:
+        - name: redis
+          containerPort: 6379
+      readinessProbe:
+        tcpSocket:
+          port: redis 
+        initialDelaySeconds: 3
+        periodSeconds: 5
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 250m
+          memory: 256Mi
+--- 
+
+apiVersion: v1 
+kind: Service
+metadata:
+
+  name: redis-noauth
+  namespace: redis-observability
+spec:
+  selector:
+    app: redis-noauth
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+  type: ClusterIP
+  
