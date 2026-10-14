@@ -204,16 +204,19 @@ def main():
                 GROUP, VERSION, NAMESPACE, PLURAL, obj
             )
 
-        elif action == "UPDATE":
-            api.patch_namespaced_custom_object(
-                GROUP,
-                VERSION,
-                NAMESPACE,
-                PLURAL,
-                name,
-                {"spec": obj["spec"]},
-                _content_type="application/merge-patch+json"
-            )
+
+elif action == "UPDATE":
+    api.patch_namespaced_custom_object(
+        group=GROUP,
+        version=VERSION,
+        namespace=NAMESPACE,
+        plural=PLURAL,
+        name=name,
+        body={
+            "spec": obj["spec"]
+        }
+    )
+
 
         elif action == "DELETE":
             api.delete_namespaced_custom_object(
