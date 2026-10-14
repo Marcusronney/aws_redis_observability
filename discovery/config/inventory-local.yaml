@@ -7,7 +7,7 @@ redis:
     tags:
       Environment: homologation
       Project: aws-redis-observability
-      CostCenter: "2050"
+      CostCenter: "4050"
       BusinessUnit: technology
 
   - id: redis-lab-auth
