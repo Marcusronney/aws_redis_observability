@@ -1,0 +1,37 @@
+
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+
+metadata:
+  name: redis-auth
+  namespace: redis-observability
+
+  labels:
+    app.kubernetes.io/part-of: redis-observability
+
+spec:
+  jobName: redis-auth
+  scrapeInterval: 30s
+  scrapeTimeout: 10s
+  metricsPath: /scrape
+  scheme: HTTP
+
+  staticConfigs:
+    - targets:
+        - redis://default@redis-auth.redis-observability.svc.cluster.local:6379
+
+      labels:
+        environment: local
+        project: aws-redis-observability
+        authentication: "true"
+        discovery_type: laboratory
+
+  relabelings:
+    - sourceLabels: [__address__]
+      targetLabel: __param_target
+
+    - sourceLabels: [__param_target]
+      targetLabel: instance
+
+    - targetLabel: __address__
+      replacement: redis-exporter-auth.redis-observability.svc.cluster.local:9121

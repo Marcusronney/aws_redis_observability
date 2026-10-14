@@ -1,0 +1,75 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter-auth
+  namespace: redis-observability
+  labels:
+    app: redis-exporter-auth
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-exporter-auth
+
+  template:
+    metadata:
+      labels:
+        app: redis-exporter-auth
+
+    spec:
+      containers:
+        - name: redis-exporter
+          image: oliver006/redis_exporter:v1.80.2
+
+          args:
+            - --web.listen-address=:9121
+            - --redis.password-file=/etc/redis-credentials/passwords.json
+
+          ports:
+            - name: metrics
+              containerPort: 9121
+
+          volumeMounts:
+            - name: redis-credentials
+              mountPath: /etc/redis-credentials
+              readOnly: true
+
+          readinessProbe:
+            tcpSocket:
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+
+      volumes:
+        - name: redis-credentials
+          secret:
+            secretName: redis-exporter-auth-credentials
+            defaultMode: 0400
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-exporter-auth
+  namespace: redis-observability
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: redis-exporter-auth
+
+  ports:
+    - name: metrics
+      port: 9121
+      targetPort: metrics
