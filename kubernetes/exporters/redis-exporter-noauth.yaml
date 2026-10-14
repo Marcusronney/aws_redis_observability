@@ -1,0 +1,65 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter-noauth
+  namespace: redis-observability
+  labels:
+    app: redis-exporter-noauth
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: redis-exporter-noauth
+
+  template:
+    metadata:
+      labels:
+        app: redis-exporter-noauth
+
+    spec:
+      containers:
+        - name: redis-exporter
+          image: oliver006/redis_exporter:v1.80.2
+
+          args:
+            - --web.listen-address=:9121
+
+          ports:
+            - name: metrics
+              containerPort: 9121
+
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-exporter-noauth
+  namespace: redis-observability
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: redis-exporter-noauth
+
+  ports:
+    - name: metrics
+      port: 9121
+      targetPort: metrics
