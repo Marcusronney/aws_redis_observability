@@ -1,0 +1,12 @@
+.git/
+.venv/
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/tfplan
+**/__pycache__/
+**/*.pyc
+.env
+.env.*
+**/*.pem
+**/*.key
