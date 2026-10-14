@@ -5,9 +5,9 @@ redis:
     authentication: false
 
     tags:
-      Environment: local
+      Environment: homologation
       Project: aws-redis-observability
-      CostCenter: "1050"
+      CostCenter: "2050"
       BusinessUnit: technology
 
   - id: redis-lab-auth
