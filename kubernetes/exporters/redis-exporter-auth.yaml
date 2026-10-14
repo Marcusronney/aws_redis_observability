@@ -19,6 +19,9 @@ spec:
         app: redis-exporter-auth
 
     spec:
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: redis-exporter
           image: oliver006/redis_exporter:v1.80.2
@@ -50,11 +53,14 @@ spec:
               cpu: 200m
               memory: 128Mi
 
+
+
       volumes:
         - name: redis-credentials
           secret:
             secretName: redis-exporter-auth-credentials
-            defaultMode: 0400
+            defaultMode: 0440
+        
 
 ---
 apiVersion: v1
