@@ -1,0 +1,21 @@
+
+redis:
+  - id: redis-lab-noauth
+    address: redis-noauth.redis-observability.svc.cluster.local:6379
+    authentication: false
+
+    tags:
+      Environment: local
+      Project: aws-redis-observability
+      CostCenter: "1050"
+      BusinessUnit: technology
+
+  - id: redis-lab-auth
+    address: redis://default@redis-auth.redis-observability.svc.cluster.local:6379
+    authentication: true
+
+    tags:
+      Environment: local
+      Project: aws-redis-observability
+      CostCenter: "1050"
+      BusinessUnit: technology

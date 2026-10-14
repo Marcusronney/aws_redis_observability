@@ -1,0 +1,2 @@
+kubernetes>=32,<36
+PyYAML>=6,<7
