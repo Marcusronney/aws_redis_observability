@@ -1,0 +1,40 @@
+
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+
+metadata:
+  name: redis-noauth
+  namespace: redis-observability
+  labels:
+    app.kubernetes.io/part-of: redis-observability
+
+spec:
+  jobName: redis-noauth
+  scrapeInterval: 30s
+  scrapeTimeout: 10s
+
+  metricsPath: /scrape
+  scheme: HTTP
+
+  staticConfigs:
+    - targets:
+        - redis-noauth.redis-observability.svc.cluster.local:6379
+
+      labels:
+        environment: local
+        project: aws-redis-observability
+        authentication: "false"
+        discovery_type: laboratory
+
+  relabelings:
+    # Preserva o endereco original do Redis
+    - sourceLabels: [__address__]
+      targetLabel: __param_target
+
+    # Identifica qual Redis esta sendo monitorado
+    - sourceLabels: [__param_target]
+      targetLabel: instance
+
+    # Redireciona o scrape para o exporter
+    - targetLabel: __address__
+      replacement: redis-exporter-noauth.redis-observability.svc.cluster.local:9121
