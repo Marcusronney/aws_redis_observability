@@ -32,3 +32,19 @@ kubeconfig.*
 # OS
 .DS_Store
 Thumbs.db
+
+# Terraform
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfplan
+**/tfplan
+**/terraform.tfvars
+**/*.auto.tfvars
+**/crash.log
+
+# Credenciais
+.env
+.env.*
+*.pem
+*.key
