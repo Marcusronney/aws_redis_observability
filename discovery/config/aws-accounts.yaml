@@ -1,0 +1,14 @@
+
+accounts:
+  - name: estudos
+    account_id: "762012032320"
+    profile: redis-discovery
+
+    regions:
+      - us-east-1
+      - sa-east-1
+
+tag_labels:
+  Project: project
+  Environment: environment
+  CostCenter: cost_center
