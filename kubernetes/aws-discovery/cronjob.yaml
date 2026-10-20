@@ -41,7 +41,7 @@ spec:
       template:
         spec:
           serviceAccountName: redis-discovery-aws
-          automountServiceAccountToken: false
+          automountServiceAccountToken: true
           restartPolicy: Never
 
           securityContext:
@@ -70,7 +70,11 @@ spec:
                   python -m discovery.aws_discovery.scrapeconfig \
                     --input /tmp/targets.json \
                     --output /tmp/scrapeconfig.yaml
+                  
+                    echo "Iniciando reconciliacao AWS em dry-run..."
 
+                  python -m discovery.aws_discovery.reconciler \
+                      --input /tmp/targets.json
                   python -c 'import json; d=json.load(open("/tmp/targets.json")); print("TARGET_COUNT:",d["target_count"]); print("TARGET_IDS:",[t["id"] for t in d["targets"]])'
 
                   echo "AWS Discovery concluido."

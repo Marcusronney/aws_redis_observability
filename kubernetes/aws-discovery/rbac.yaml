@@ -1,0 +1,29 @@
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: redis-discovery-aws
+  namespace: redis-observability
+rules:
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - scrapeconfigs
+    verbs:
+      - get
+      - list
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: redis-discovery-aws
+  namespace: redis-observability
+subjects:
+  - kind: ServiceAccount
+    name: redis-discovery-aws
+    namespace: redis-observability
+roleRef:
+  kind: Role
+  name: redis-discovery-aws
+  apiGroup: rbac.authorization.k8s.io
