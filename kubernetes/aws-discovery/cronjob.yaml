@@ -28,7 +28,7 @@ metadata:
     app.kubernetes.io/part-of: redis-observability
 spec:
   schedule: "*/15 * * * *"
-  suspend: true
+  suspend: false
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
