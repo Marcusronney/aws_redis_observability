@@ -1,5 +1,6 @@
 
 import boto3
+import os
 from botocore.config import Config
 
 
@@ -17,10 +18,12 @@ def create_session(account):
     profile = account.get("profile")
     expected_account = str(account["account_id"])
 
-    if profile:
-        session = boto3.Session(profile_name=profile)
+    selected_profile = os.getenv("REDIS_AWS_PROFILE") or profile
+
+    if selected_profile:
+    session = boto3.Session(profile_name=selected_profile)
     else:
-        session = boto3.Session()
+    session = boto3.Session()
 
     sts = session.client("sts", config=AWS_CONFIG)
     identity = sts.get_caller_identity()
