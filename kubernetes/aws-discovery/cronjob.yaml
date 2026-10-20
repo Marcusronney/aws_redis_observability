@@ -52,7 +52,7 @@ spec:
 
           containers:
             - name: aws-discovery
-              image: redis-discovery-aws:local-v1
+              image: redis-discovery-aws:local-v3
               imagePullPolicy: IfNotPresent
 
               command:
