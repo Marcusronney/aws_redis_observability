@@ -22,17 +22,14 @@ RUN apt-get update \
     && chmod 755 /usr/local/bin/aws_signing_helper \
     && rm -rf /var/lib/apt/lists/*
 
-COPY discovery/requirements-aws.txt \
-     /app/discovery/requirements-aws.txt
 
-RUN pip install --no-cache-dir \
-    -r /app/discovery/requirements-aws.txt
+COPY discovery/aws_discovery/ /app/discovery/aws_discovery/
 
-COPY discovery/aws_discovery/ \
-     /app/discovery/aws_discovery/
+COPY discovery/config/aws-accounts.yaml /app/discovery/config/aws-accounts.yaml
 
-COPY discovery/config/aws-accounts.yaml \
-     /app/discovery/config/aws-accounts.yaml
+# Corrige permissoes dos arquivos Python
+RUN chown -R 10001:10001 /app/discovery \
+    && chmod -R a+rX /app/discovery
 
 USER 10001:10001
 
