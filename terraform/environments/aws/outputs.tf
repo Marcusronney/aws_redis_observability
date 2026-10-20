@@ -19,3 +19,15 @@ output "discovery_policy_arn" {
   description = "ARN da policy de leitura"
   value       = aws_iam_policy.redis_discovery.arn
 }
+
+
+
+output "roles_anywhere_trust_anchor_arn" {
+  description = "ARN do Trust Anchor"
+  value       = aws_rolesanywhere_trust_anchor.redis_discovery.arn
+}
+
+output "roles_anywhere_profile_arn" {
+  description = "ARN do Profile Roles Anywhere"
+  value       = aws_rolesanywhere_profile.redis_discovery.arn
+}

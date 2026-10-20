@@ -31,3 +31,12 @@ variable "admin_sso_role_arn" {
     error_message = "Informe o ARN IAM da role SSO da conta Estudos."
   }
 }
+
+
+
+variable "roles_anywhere_ca_cert_path" {
+  description = "Caminho local do certificado publico da CA do Discovery"
+  type        = string
+
+  default = "/etc/redis-observability/rolesanywhere/ca.crt"
+}

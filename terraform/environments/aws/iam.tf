@@ -22,6 +22,62 @@ data "aws_iam_policy_document" "discovery_trust" {
       ]
     }
   }
+
+  
+  statement {
+    sid    = "AllowRolesAnywhereDiscovery"
+    effect = "Allow"
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession",
+      "sts:SetSourceIdentity"
+    ]
+
+    principals {
+      type = "Service"
+
+      identifiers = [
+        "rolesanywhere.amazonaws.com"
+      ]
+    }
+
+    # Aceita somente o Trust Anchor criado
+    # por este projeto.
+
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:SourceArn"
+
+      values = [
+        aws_rolesanywhere_trust_anchor.redis_discovery.arn
+      ]
+    }
+
+    # Limita a conta AWS autorizada.
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+
+      values = [
+        var.aws_account_id
+      ]
+    }
+
+    # Somente certificados com este CN
+    # poderao assumir a role.
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:PrincipalTag/x509Subject/CN"
+
+      values = [
+        "redis-observability-discovery"
+      ]
+    }
+  }
+
 }
 
 # --------------------------------------------------
