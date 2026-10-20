@@ -21,9 +21,9 @@ def create_session(account):
     selected_profile = os.getenv("REDIS_AWS_PROFILE") or profile
 
     if selected_profile:
-    session = boto3.Session(profile_name=selected_profile)
+        session = boto3.Session(profile_name=selected_profile)
     else:
-    session = boto3.Session()
+        session = boto3.Session()
 
     sts = session.client("sts", config=AWS_CONFIG)
     identity = sts.get_caller_identity()
