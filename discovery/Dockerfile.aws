@@ -8,9 +8,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 ENV AWS_EC2_METADATA_DISABLED=true
 
-# Instalacao do AWS Signing Helper
-# com verificacao de integridade.
-
+# Instala o AWS Signing Helper com verificacao SHA256
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        ca-certificates curl \
@@ -22,12 +20,18 @@ RUN apt-get update \
     && chmod 755 /usr/local/bin/aws_signing_helper \
     && rm -rf /var/lib/apt/lists/*
 
+# Instala dependencias Python do Discovery AWS
+COPY discovery/requirements-aws.txt /app/discovery/requirements-aws.txt
 
+RUN pip install --no-cache-dir \
+    -r /app/discovery/requirements-aws.txt
+
+# Copia o codigo e a configuracao
 COPY discovery/aws_discovery/ /app/discovery/aws_discovery/
 
 COPY discovery/config/aws-accounts.yaml /app/discovery/config/aws-accounts.yaml
 
-# Corrige permissoes dos arquivos Python
+# Permissoes para executar como usuario nao-root
 RUN chown -R 10001:10001 /app/discovery \
     && chmod -R a+rX /app/discovery
 
