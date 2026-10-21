@@ -1,0 +1,19 @@
+# Run docker build from the EXISTING REPOSITORY ROOT:
+# docker build -f distributed-collector/kubernetes/Dockerfile.distributed -t redis-discovery-aws:distributed-v1 .
+FROM python:3.11-slim
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app AWS_EC2_METADATA_DISABLED=true
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
+  && curl -fL 'https://rolesanywhere.amazonaws.com/releases/1.8.5/X86_64/Linux/Amzn2023/aws_signing_helper' -o /usr/local/bin/aws_signing_helper \
+  && echo 'beec9ed1c492d93db809890f16713e3556353294b823c2184ad4e891f1b2b54d  /usr/local/bin/aws_signing_helper' | sha256sum -c - \
+  && chmod 755 /usr/local/bin/aws_signing_helper \
+  && rm -rf /var/lib/apt/lists/*
+COPY discovery/requirements-aws.txt /app/discovery/requirements-aws.txt
+COPY distributed-collector/controller/requirements.txt /app/distributed_collector/requirements.txt
+RUN pip install --no-cache-dir -r /app/discovery/requirements-aws.txt -r /app/distributed_collector/requirements.txt
+COPY discovery/aws_discovery/ /app/discovery/aws_discovery/
+COPY discovery/config/aws-accounts.yaml /app/discovery/config/aws-accounts.yaml
+COPY distributed-collector/controller/reconcile.py /app/distributed_collector/reconcile.py
+RUN chown -R 10001:10001 /app && chmod -R a+rX /app
+USER 10001:10001
+CMD ["python", "-m", "discovery.aws_discovery"]
