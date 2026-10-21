@@ -27,7 +27,7 @@ metadata:
   labels:
     app.kubernetes.io/part-of: redis-observability
 spec:
-  schedule: "*/15 * * * *"
+  schedule: "*/5 * * * *"
   suspend: false
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
@@ -59,9 +59,13 @@ spec:
                 - sh
                 - -ec
 
+             
               args:
                 - |
-                  python -m discovery.aws_discovery > /tmp/inventory.json
+                  echo "Iniciando descoberta AWS..."
+
+                  python -m discovery.aws_discovery \
+                    > /tmp/inventory.json
 
                   python -m discovery.aws_discovery.targets \
                     --input /tmp/inventory.json \
@@ -70,15 +74,17 @@ spec:
                   python -m discovery.aws_discovery.scrapeconfig \
                     --input /tmp/targets.json \
                     --output /tmp/scrapeconfig.yaml
-                  
-                    echo "Iniciando reconciliacao AWS em dry-run..."
 
-                  python -m discovery.aws_discovery.reconciler \
-                      --input /tmp/targets.json
                   python -c 'import json; d=json.load(open("/tmp/targets.json")); print("TARGET_COUNT:",d["target_count"]); print("TARGET_IDS:",[t["id"] for t in d["targets"]])'
 
-                  echo "AWS Discovery concluido."
-                  echo "Nenhuma alteracao aplicada no Kubernetes."
+                  echo "Iniciando reconciliacao AWS..."
+
+                  python -m discovery.aws_discovery.reconciler \
+                    --input /tmp/targets.json \
+                    --apply
+
+                  echo "AWS Discovery e reconciliacao concluidos."
+
 
               env:
                 - name: REDIS_AWS_PROFILE

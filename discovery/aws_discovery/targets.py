@@ -33,10 +33,70 @@ def select_targets(inventory):
                 for item in resources
                 if item.get("type") == "cluster"
             }
+           
 
+           
             for resource in resources:
+
+                # ElastiCache Serverless (Redis / Valkey)
+                if resource.get("type") == "serverless":
+
+                    if resource.get("status") != "available":
+                        continue
+
+                    engine = resource.get("engine")
+
+                    if engine not in ("redis", "valkey"):
+                        continue
+
+                    primary = next(
+                        (
+                            ep
+                            for ep in resource.get("endpoints", [])
+                            if ep.get("role") == "primary"
+                        ),
+                        None,
+                    )
+
+                    if not primary:
+                        continue
+
+                    identifier = (
+                        f"{account_id}:{region_name}:"
+                        f"serverless:{resource['id']}"
+                    )
+
+                    if identifier in seen:
+                        continue
+
+                    seen.add(identifier)
+
+                    targets.append({
+                        "id": identifier,
+                        "account_id": account_id,
+                        "region": region_name,
+                        "replication_group_id": resource["id"],
+                        "engine": engine,
+                        "endpoint": (
+                            f"{primary['address']}:"
+                            f"{primary['port']}"
+                        ),
+                        "endpoint_role": "primary",
+                        "tls": True,
+                        "auth_required": False,
+                        "labels": {
+                            **resource.get("labels", {}),
+                            "aws_resource_type": "serverless",
+                        },
+                    })
+
+                    continue
+
+                # ElastiCache baseado em nos (logica existente)
                 if resource.get("type") != "replication_group":
                     continue
+
+
 
                 if resource.get("status") != "available":
                     continue

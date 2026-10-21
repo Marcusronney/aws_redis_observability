@@ -7,8 +7,13 @@ accounts:
     regions:
       - us-east-1
       - sa-east-1
-
 tag_labels:
   Project: project
   Environment: environment
   CostCenter: cost_center
+
+  project: project
+  environment: environment
+  cost_center: cost_center
+  business_unit: business_unit
+  owner: owner

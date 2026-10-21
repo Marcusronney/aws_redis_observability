@@ -23,7 +23,7 @@ data "aws_iam_policy_document" "discovery_trust" {
     }
   }
 
-  
+
   statement {
     sid    = "AllowRolesAnywhereDiscovery"
     effect = "Allow"
