@@ -1,0 +1,17 @@
+# Terraform state / plans / secrets
+**/.terraform/
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/*.tfplan
+**/tfplan
+**/terraform.tfvars
+**/terraform.tfvars.json
+**/crash.log
+**/.terraform.lock.hcl
+controller/config.yaml
+**/*private*.pem
+**/vault-token
+**/vault-token.*
+**/__pycache__/
+**/*.pyc
+kubernetes/distributed-controller/controller-config.yaml

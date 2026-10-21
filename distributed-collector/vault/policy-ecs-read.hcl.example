@@ -1,0 +1,5 @@
+# Vault KV v2 example; adjust mount and path to your Vault layout.
+# This is not a Redis password. It grants read-only access to Vault Agent identity.
+path "kv/data/redis/aws/*" {
+  capabilities = ["read"]
+}
