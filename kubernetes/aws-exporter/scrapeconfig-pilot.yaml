@@ -1,0 +1,35 @@
+
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: aws-valkey-pilot
+  namespace: redis-observability
+  labels:
+    app.kubernetes.io/part-of: redis-observability
+    discovery-source: aws-pilot
+spec:
+  jobName: redis-aws-pilot
+  metricsPath: /scrape
+  scrapeInterval: 30s
+  scrapeTimeout: 10s
+
+  staticConfigs:
+    - targets:
+        - rediss://master.redis-observability-lab.f5usda.use1.cache.amazonaws.com:6379
+      labels:
+        source: aws
+        engine: valkey
+        replication_group: redis-observability-lab
+        aws_region: us-east-1
+
+  relabelings:
+    - sourceLabels:
+        - __address__
+      targetLabel: __param_target
+
+    - sourceLabels:
+        - __param_target
+      targetLabel: instance
+
+    - targetLabel: __address__
+      replacement: redis-exporter-aws.redis-observability.svc.cluster.local:9121

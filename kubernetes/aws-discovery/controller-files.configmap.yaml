@@ -1,0 +1,104 @@
+apiVersion: v1
+data:
+  aws-accounts.yaml: |
+    accounts:
+    - name: estudos
+      account_id: '762012032320'
+      profile: redis-discovery
+      regions:
+      - us-east-1
+      - sa-east-1
+      provision_role_arn: arn:aws:iam::762012032320:role/RedisObservabilityProvisionRole
+    tag_labels:
+      Project: project
+      Environment: environment
+      CostCenter: cost_center
+      project: project
+      environment: environment
+      cost_center: cost_center
+      business_unit: business_unit
+      owner: owner
+  collection-routing.yaml: |
+    version: 1
+
+    allowed_accounts:
+      - "762012032320"
+
+    default_mode: distributed
+
+    local_targets:
+      - "762012032320:us-east-1:replication_group:redis-observability-lab"
+
+    blocked_targets: []
+  ecs-task-template.json: |-
+    {
+      "family": "redis-observability-sa-pilot",
+      "taskRoleArn": "arn:aws:iam::762012032320:role/redis-observability-ecs-task",
+      "executionRoleArn": "arn:aws:iam::762012032320:role/redis-observability-ecs-execution",
+      "networkMode": "awsvpc",
+      "containerDefinitions": [
+        {
+          "name": "redis-exporter",
+          "image": "ghcr.io/oliver006/redis_exporter:v1.93.0",
+          "cpu": 0,
+          "portMappings": [],
+          "essential": true,
+          "environment": [
+            {
+              "name": "REDIS_EXPORTER_SKIP_TLS_VERIFICATION",
+              "value": "false"
+            },
+            {
+              "name": "REDIS_ADDR",
+              "value": "rediss://redis-observability-sa-test-ob1yxa.serverless.sae1.cache.amazonaws.com:6379"
+            }
+          ],
+          "mountPoints": [],
+          "volumesFrom": [],
+          "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+              "awslogs-group": "/ecs/redis-observability-collectors",
+              "awslogs-region": "sa-east-1",
+              "awslogs-stream-prefix": "redis-exporter"
+            }
+          },
+          "systemControls": []
+        },
+        {
+          "name": "adot-collector",
+          "image": "public.ecr.aws/aws-observability/aws-otel-collector:v0.50.0",
+          "cpu": 0,
+          "portMappings": [],
+          "essential": true,
+          "environment": [
+            {
+              "name": "AOT_CONFIG_CONTENT",
+              "value": "\nreceivers:\n  prometheus:\n    config:\n      global:\n        scrape_interval: 30s\n        scrape_timeout: 15s\n      scrape_configs:\n        - job_name: redis-aws-distributed\n          static_configs:\n            - targets: [\"127.0.0.1:9121\"]\n              labels:\n                aws_account_id: \"762012032320\"\n                aws_region: \"sa-east-1\"\n                aws_resource_type: \"serverless\"\n                environment: \"homologation\"\n                cost_center: \"4050\"\n                business_unit: \"technology\"\n                project: \"aws-redis-observability\"\n                engine: \"valkey\"\n                redis_name: \"redis-observability-sa-test\"\n\nprocessors:\n  batch:\n    timeout: 10s\n\nexporters:\n  prometheusremotewrite:\n    endpoint: \"https://aps-workspaces.us-east-1.amazonaws.com/workspaces/ws-a32bf55d-d10a-4d22-9873-a937f133db67/api/v1/remote_write\"\n    auth:\n      authenticator: sigv4auth\n\nextensions:\n  sigv4auth:\n    region: \"us-east-1\"\n    service: aps\n\nservice:\n  extensions: [sigv4auth]\n  pipelines:\n    metrics:\n      receivers: [prometheus]\n      processors: [batch]\n      exporters: [prometheusremotewrite]\n"
+            }
+          ],
+          "mountPoints": [],
+          "volumesFrom": [],
+          "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+              "awslogs-group": "/ecs/redis-observability-collectors",
+              "awslogs-region": "sa-east-1",
+              "awslogs-stream-prefix": "adot"
+            }
+          },
+          "systemControls": []
+        }
+      ],
+      "volumes": [],
+      "placementConstraints": [],
+      "requiresCompatibilities": [
+        "FARGATE"
+      ],
+      "cpu": "1024",
+      "memory": "2048"
+    }
+kind: ConfigMap
+metadata:
+  name: redis-discovery-controller-files
+  namespace: redis-observability
