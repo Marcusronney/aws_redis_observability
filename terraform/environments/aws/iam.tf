@@ -106,6 +106,17 @@ resource "aws_iam_role" "redis_discovery" {
 
 data "aws_iam_policy_document" "discovery_permissions" {
   statement {
+    sid       = "ReadSubnetVpcForLocalRouting"
+    effect    = "Allow"
+    actions   = ["ec2:DescribeSubnets"]
+    resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestedRegion"
+      values   = ["us-east-1", "sa-east-1"]
+    }
+  }
+  statement {
     sid    = "ReadElastiCacheInventory"
     effect = "Allow"
 

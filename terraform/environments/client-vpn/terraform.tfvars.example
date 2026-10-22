@@ -1,0 +1,5 @@
+server_certificate_arn              = "arn:aws:acm:sa-east-1:762012032320:certificate/REPLACE"
+# The server certificate ARN can be reused here when both certificates use
+# the exclusive lab CA. Do not import the Rocky private key into ACM.
+client_root_certificate_chain_arn   = "arn:aws:acm:sa-east-1:762012032320:certificate/REPLACE"
+client_cidr                        = "172.28.240.0/22"

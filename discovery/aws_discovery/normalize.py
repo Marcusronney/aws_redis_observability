@@ -152,6 +152,8 @@ def normalize_serverless(resource, labels):
         "arn": resource.get("ARN"),
         "engine": resource.get("Engine"),
         "status": resource.get("Status"),
+        "subnet_ids": resource.get("SubnetIds", []),
+        "user_group_id": resource.get("UserGroupId"),
         "endpoints": endpoints,
         "labels": labels,
     }

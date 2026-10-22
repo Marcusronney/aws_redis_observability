@@ -35,6 +35,7 @@ def discover_region(session, region, tag_mapping):
 
     inventory = discover_resources(client)
     resources = []
+    subnet_vpcs = {}
 
     normalizers = {
         "clusters": normalize_cluster,
@@ -55,6 +56,20 @@ def discover_region(session, region, tag_mapping):
 
             resource = normalizer(item, labels)
             resource["region"] = region
+            # Keep operational tags out of metric labels. They authorize routing
+            # and authentication, but never contain passwords.
+            resource["tags"] = tags
+            if kind == "serverless":
+                subnet_ids = resource["subnet_ids"]
+                missing = sorted(set(subnet_ids) - subnet_vpcs.keys())
+                if missing:
+                    ec2 = session.client("ec2", region_name=region)
+                    for subnet in ec2.describe_subnets(SubnetIds=missing)["Subnets"]:
+                        subnet_vpcs[subnet["SubnetId"]] = subnet["VpcId"]
+                vpcs = {subnet_vpcs[s] for s in subnet_ids}
+                if len(vpcs) != 1:
+                    raise ValueError("Serverless subnets must resolve to one VPC")
+                resource["vpc_id"] = vpcs.pop()
 
             resources.append(resource)
 

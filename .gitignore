@@ -55,3 +55,11 @@ Thumbs.db
 .venv-aws/
 __pycache__/
 *.pyc
+.work-vpn/
+redis-vpn-source.tgz
+*.ovpn
+*.crt
+*.csr
+*.srl
+*.bak
+*.pre-v5.bak

@@ -1,11 +1,9 @@
-
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: redis-discovery-aws
   namespace: redis-observability
 automountServiceAccountToken: false
-
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -13,11 +11,18 @@ metadata:
   name: redis-discovery-aws-config
   namespace: redis-observability
 data:
-  config: |
-    [profile redis-discovery-rolesanywhere]
-    region = us-east-1
-    credential_process = /usr/local/bin/aws_signing_helper credential-process --certificate /etc/rolesanywhere/discovery.crt --private-key /etc/rolesanywhere/discovery.key --trust-anchor-arn arn:aws:rolesanywhere:us-east-1:762012032320:trust-anchor/42371124-90c5-4c53-a0cd-c5b7ae2da087 --profile-arn arn:aws:rolesanywhere:us-east-1:762012032320:profile/b24aa831-cbe6-4cfc-bd14-9a12f9f75f2d --role-arn arn:aws:iam::762012032320:role/RedisObservabilityDiscoveryRole --region us-east-1
+  config: '[profile redis-discovery-rolesanywhere]
 
+    region = us-east-1
+
+    credential_process = /usr/local/bin/aws_signing_helper credential-process --certificate
+    /etc/rolesanywhere/discovery.crt --private-key /etc/rolesanywhere/discovery.key
+    --trust-anchor-arn arn:aws:rolesanywhere:us-east-1:762012032320:trust-anchor/42371124-90c5-4c53-a0cd-c5b7ae2da087
+    --profile-arn arn:aws:rolesanywhere:us-east-1:762012032320:profile/b24aa831-cbe6-4cfc-bd14-9a12f9f75f2d
+    --role-arn arn:aws:iam::762012032320:role/RedisObservabilityDiscoveryRole --region
+    us-east-1
+
+    '
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -27,12 +32,11 @@ metadata:
   labels:
     app.kubernetes.io/part-of: redis-observability
 spec:
-  schedule: "*/15 * * * *"
+  schedule: '*/5 * * * *'
   suspend: false
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
-
   jobTemplate:
     spec:
       backoffLimit: 1
@@ -43,87 +47,83 @@ spec:
           serviceAccountName: redis-discovery-aws
           automountServiceAccountToken: true
           restartPolicy: Never
-
           securityContext:
             runAsNonRoot: true
             runAsUser: 10001
             runAsGroup: 10001
             fsGroup: 10001
-
           containers:
-            - name: aws-discovery
-              image: redis-discovery-aws:local-v3
-              imagePullPolicy: IfNotPresent
+          - name: aws-discovery
+            image: redis-discovery-aws:local-v6-vpn
+            imagePullPolicy: IfNotPresent
+            command:
+            - sh
+            - -ec
+            args:
+            - 'set -eu
 
-              command:
-                - sh
-                - -ec
+              python -m discovery.aws_discovery > /tmp/inventory.json
 
-              args:
-                - |
-                  python -m discovery.aws_discovery > /tmp/inventory.json
+              python -m discovery.aws_discovery.targets --input /tmp/inventory.json
+              > /tmp/targets.json
 
-                  python -m discovery.aws_discovery.targets \
-                    --input /tmp/inventory.json \
-                    > /tmp/targets.json
+              python -m discovery.aws_discovery.filter_local_targets --input /tmp/targets.json
+              --output /tmp/local-targets.json
 
-                  python -m discovery.aws_discovery.scrapeconfig \
-                    --input /tmp/targets.json \
-                    --output /tmp/scrapeconfig.yaml
-                  
-                    echo "Iniciando reconciliacao AWS em dry-run..."
+              python -m discovery.aws_discovery.scrapeconfig --input /tmp/local-targets.json
+              --output /tmp/scrapeconfig.yaml
 
-                  python -m discovery.aws_discovery.reconciler \
-                      --input /tmp/targets.json
-                  python -c 'import json; d=json.load(open("/tmp/targets.json")); print("TARGET_COUNT:",d["target_count"]); print("TARGET_IDS:",[t["id"] for t in d["targets"]])'
+              python -m discovery.aws_discovery.reconciler --input /tmp/local-targets.json
+              --apply
 
-                  echo "AWS Discovery concluido."
-                  echo "Nenhuma alteracao aplicada no Kubernetes."
+              # Existing ECS services remain running; the pilot performs only a dry-run.
 
-              env:
-                - name: REDIS_AWS_PROFILE
-                  value: redis-discovery-rolesanywhere
-                - name: AWS_CONFIG_FILE
-                  value: /etc/aws/config
-                - name: AWS_EC2_METADATA_DISABLED
-                  value: "true"
+              python -m discovery.aws_discovery.ecs_controller --inventory /tmp/inventory.json
+              --output /tmp/ecs-plan.json
 
-              resources:
-                requests:
-                  cpu: 25m
-                  memory: 64Mi
-                limits:
-                  cpu: 250m
-                  memory: 256Mi
-
-              securityContext:
-                allowPrivilegeEscalation: false
-                readOnlyRootFilesystem: true
-                capabilities:
-                  drop:
-                    - ALL
-
-              volumeMounts:
-                - name: aws-config
-                  mountPath: /etc/aws
-                  readOnly: true
-
-                - name: certificate
-                  mountPath: /etc/rolesanywhere
-                  readOnly: true
-
-                - name: tmp
-                  mountPath: /tmp
-
-          volumes:
+              '
+            env:
+            - name: REDIS_AWS_PROFILE
+              value: redis-discovery-rolesanywhere
+            - name: AWS_CONFIG_FILE
+              value: /etc/aws/config
+            - name: AWS_EC2_METADATA_DISABLED
+              value: 'true'
+            resources:
+              requests:
+                cpu: 25m
+                memory: 64Mi
+              limits:
+                cpu: 250m
+                memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                - ALL
+            volumeMounts:
             - name: aws-config
-              configMap:
-                name: redis-discovery-aws-config
-
+              mountPath: /etc/aws
+              readOnly: true
             - name: certificate
-              secret:
-                secretName: redis-discovery-aws-cert
-                defaultMode: 0440
-
+              mountPath: /etc/rolesanywhere
+              readOnly: true
             - name: tmp
-              emptyDir: {}
+              mountPath: /tmp
+            - name: controller-files
+              mountPath: /app/discovery/config
+              readOnly: true
+          volumes:
+          - name: aws-config
+            configMap:
+              name: redis-discovery-aws-config
+          - name: certificate
+            secret:
+              secretName: redis-discovery-aws-cert
+              defaultMode: 288
+          - name: tmp
+            emptyDir: {}
+          - name: controller-files
+            configMap:
+              name: redis-discovery-controller-files

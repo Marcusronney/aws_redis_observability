@@ -1,18 +1,47 @@
 """Filtra apenas Redis cuja coleta deve permanecer no Prometheus local."""
 import argparse
 import json
+import ipaddress
+import socket
+import ssl
 from pathlib import Path
 
 import yaml
 
 
-def filter_targets(document, policy):
+def check_private_route(target, route):
+    """Validate DNS, CIDR and TCP/TLS from the calling Pod before reconcile.
+
+    This is not an authentication test; redis_up is the final acceptance gate.
+    Failure aborts the cycle instead of withdrawing previously working targets.
+    """
+    host, port = target["endpoint"].rsplit(":", 1)
+    networks = [ipaddress.ip_network(c) for c in route["destination_cidrs"]]
+    if not networks or any(n.prefixlen == 0 for n in networks):
+        raise ValueError("Private route requires restricted destination CIDRs")
+    addresses = sorted({a[4][0] for a in socket.getaddrinfo(host, int(port), type=socket.SOCK_STREAM)})
+    if not addresses:
+        raise ValueError("Redis DNS returned no addresses")
+    for address in addresses:
+        ip = ipaddress.ip_address(address)
+        if not ip.is_private or not any(ip in n for n in networks):
+            raise ValueError(f"Redis address outside authorized route: {address}")
+        with socket.create_connection((address, int(port)), timeout=3) as conn:
+            if target.get("tls") is True:
+                with ssl.create_default_context().wrap_socket(conn, server_hostname=host):
+                    pass
+
+
+def filter_targets(document, policy, probe=check_private_route):
     if not isinstance(document.get("targets"), list):
         raise ValueError("Documento de targets invalido")
     allowed = {str(a) for a in policy["allowed_accounts"]}
-    local = set(policy["local_targets"])
-    blocked = set(policy["blocked_targets"])
+    # Explicit list remains solely for the already homologated Virginia target.
+    local = set(policy.get("local_targets", []))
+    blocked = set(policy.get("blocked_targets", []))
+    routes = policy.get("local_networks", [])
     selected = []
+    seen = set()
     for target in document["targets"]:
         account, region = str(target["account_id"]), target["region"]
         kind = target.get("labels", {}).get("aws_resource_type", "replication_group")
@@ -20,8 +49,31 @@ def filter_targets(document, policy):
         kind = kind if kind == "serverless" else "replication_group"
         name = target["replication_group_id"]
         identifier = f"{account}:{region}:{kind}:{name}"
-        if account in allowed and identifier in local and identifier not in blocked:
+        if account not in allowed or identifier in blocked:
+            continue
+        matched = identifier in local
+        if not matched:
+            for route in routes:
+                if (route.get("enabled") is not True
+                    or str(route["account_id"]) != account
+                    or route["region"] != region
+                    or route["vpc_id"] != target.get("vpc_id")):
+                    continue
+                required = route.get("required_tags", {})
+                if not required or not all(target.get("tags", {}).get(k) == v for k, v in required.items()):
+                    continue
+                if type(target.get("auth_required")) is not bool:
+                    raise ValueError(f"Authentication not confirmed: {identifier}")
+                # Pilot only enables noauth. Authenticated routing requires a
+                # separately homologated Vault -> Secret -> exporter mapping.
+                if target["auth_required"] and route.get("allow_authenticated") is not True:
+                    continue
+                probe(target, route)
+                matched = True
+                break
+        if matched and identifier not in seen:
             selected.append(target)
+            seen.add(identifier)
     return {"mode": "targets-dry-run", "target_count": len(selected), "targets": selected}
 
 

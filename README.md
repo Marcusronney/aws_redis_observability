@@ -1,4 +1,8 @@
 # aws_redis_observability
+Procedimento atual para centralizar a coleta no Prometheus do Kind:
+[piloto Client VPN São Paulo](docs/CLIENT_VPN_PILOTO.md).
+O código está preparado; a implantação da VPN não foi autorizada e ainda não foi homologada.
+
 Descoberta e monitoramento automatizados de instâncias AWS Redis em múltiplas contas no Kubernetes, utilizando Terraform, Python, Vault, redis_exporter e Prometheus Operator.
 
 # AWS Redis Observability
@@ -48,9 +52,7 @@ As credenciais são gerenciadas pelo Vault.
 
 ## Status
 
-**Etapa 1:** Preparação do repositório e ambiente Kubernetes local.
-
-**Próxima etapa:** Instalação do Prometheus Operator.
-
-
-
+Discovery AWS e coleta distribuída existentes foram inspecionados na VM.
+O piloto de centralização via Client VPN está preparado, com regra de São Paulo
+desabilitada até a implantação e os testes de conectividade.
+Consulte [estado, implantação e pendências](docs/CLIENT_VPN_PILOTO.md).

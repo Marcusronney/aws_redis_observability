@@ -1,0 +1,60 @@
+apiVersion: v1
+data:
+  aws-accounts.yaml: "accounts:\n- name: estudos\n  account_id: '762012032320'\n \
+    \ profile: redis-discovery\n  regions:\n  - us-east-1\n  - sa-east-1\n  provision_role_arn:\
+    \ arn:aws:iam::762012032320:role/RedisObservabilityProvisionRole\ntag_labels:\n\
+    \  Project: project\n  Environment: environment\n  CostCenter: cost_center\n \
+    \ project: project\n  environment: environment\n  cost_center: cost_center\n \
+    \ business_unit: business_unit\n  owner: owner\n"
+  collection-routing.yaml: "version: 1\n\nallowed_accounts:\n  - \"762012032320\"\n\
+    \ndefault_mode: distributed\n\nlocal_targets:\n  - \"762012032320:us-east-1:replication_group:redis-observability-lab\"\
+    \n\nblocked_targets: []\n\n# Enable only AFTER host AND Pod TLS connectivity have\
+    \ been verified.\n# New Redis are selected dynamically by account + region + VPC\
+    \ + opt-in tag.\nlocal_networks:\n  - name: client-vpn-sa-pilot\n    enabled:\
+    \ false\n    account_id: \"762012032320\"\n    region: sa-east-1\n    vpc_id:\
+    \ vpc-0eb95c9e597551a70\n    destination_cidrs:\n      - 172.31.0.0/16\n    required_tags:\n\
+    \      RedisObservability: enabled\n    allow_authenticated: false\n"
+  ecs-task-template.json: "{\n  \"family\": \"redis-observability-sa-pilot\",\n  \"\
+    taskRoleArn\": \"arn:aws:iam::762012032320:role/redis-observability-ecs-task\"\
+    ,\n  \"executionRoleArn\": \"arn:aws:iam::762012032320:role/redis-observability-ecs-execution\"\
+    ,\n  \"networkMode\": \"awsvpc\",\n  \"containerDefinitions\": [\n    {\n    \
+    \  \"name\": \"redis-exporter\",\n      \"image\": \"ghcr.io/oliver006/redis_exporter:v1.93.0\"\
+    ,\n      \"cpu\": 0,\n      \"portMappings\": [],\n      \"essential\": true,\n\
+    \      \"environment\": [\n        {\n          \"name\": \"REDIS_EXPORTER_SKIP_TLS_VERIFICATION\"\
+    ,\n          \"value\": \"false\"\n        },\n        {\n          \"name\":\
+    \ \"REDIS_ADDR\",\n          \"value\": \"rediss://redis-observability-sa-test-ob1yxa.serverless.sae1.cache.amazonaws.com:6379\"\
+    \n        }\n      ],\n      \"mountPoints\": [],\n      \"volumesFrom\": [],\n\
+    \      \"logConfiguration\": {\n        \"logDriver\": \"awslogs\",\n        \"\
+    options\": {\n          \"awslogs-group\": \"/ecs/redis-observability-collectors\"\
+    ,\n          \"awslogs-region\": \"sa-east-1\",\n          \"awslogs-stream-prefix\"\
+    : \"redis-exporter\"\n        }\n      },\n      \"systemControls\": []\n    },\n\
+    \    {\n      \"name\": \"adot-collector\",\n      \"image\": \"public.ecr.aws/aws-observability/aws-otel-collector:v0.50.0\"\
+    ,\n      \"cpu\": 0,\n      \"portMappings\": [],\n      \"essential\": true,\n\
+    \      \"environment\": [\n        {\n          \"name\": \"AOT_CONFIG_CONTENT\"\
+    ,\n          \"value\": \"\\nreceivers:\\n  prometheus:\\n    config:\\n     \
+    \ global:\\n        scrape_interval: 30s\\n        scrape_timeout: 15s\\n    \
+    \  scrape_configs:\\n        - job_name: redis-aws-distributed\\n          static_configs:\\\
+    n            - targets: [\\\"127.0.0.1:9121\\\"]\\n              labels:\\n  \
+    \              aws_account_id: \\\"762012032320\\\"\\n                aws_region:\
+    \ \\\"sa-east-1\\\"\\n                aws_resource_type: \\\"serverless\\\"\\\
+    n                environment: \\\"homologation\\\"\\n                cost_center:\
+    \ \\\"4050\\\"\\n                business_unit: \\\"technology\\\"\\n        \
+    \        project: \\\"aws-redis-observability\\\"\\n                engine: \\\
+    \"valkey\\\"\\n                redis_name: \\\"redis-observability-sa-test\\\"\
+    \\n\\nprocessors:\\n  batch:\\n    timeout: 10s\\n\\nexporters:\\n  prometheusremotewrite:\\\
+    n    endpoint: \\\"https://aps-workspaces.us-east-1.amazonaws.com/workspaces/ws-a32bf55d-d10a-4d22-9873-a937f133db67/api/v1/remote_write\\\
+    \"\\n    auth:\\n      authenticator: sigv4auth\\n\\nextensions:\\n  sigv4auth:\\\
+    n    region: \\\"us-east-1\\\"\\n    service: aps\\n\\nservice:\\n  extensions:\
+    \ [sigv4auth]\\n  pipelines:\\n    metrics:\\n      receivers: [prometheus]\\\
+    n      processors: [batch]\\n      exporters: [prometheusremotewrite]\\n\"\n \
+    \       }\n      ],\n      \"mountPoints\": [],\n      \"volumesFrom\": [],\n\
+    \      \"logConfiguration\": {\n        \"logDriver\": \"awslogs\",\n        \"\
+    options\": {\n          \"awslogs-group\": \"/ecs/redis-observability-collectors\"\
+    ,\n          \"awslogs-region\": \"sa-east-1\",\n          \"awslogs-stream-prefix\"\
+    : \"adot\"\n        }\n      },\n      \"systemControls\": []\n    }\n  ],\n \
+    \ \"volumes\": [],\n  \"placementConstraints\": [],\n  \"requiresCompatibilities\"\
+    : [\n    \"FARGATE\"\n  ],\n  \"cpu\": \"1024\",\n  \"memory\": \"2048\"\n}"
+kind: ConfigMap
+metadata:
+  name: redis-discovery-controller-files
+  namespace: redis-observability

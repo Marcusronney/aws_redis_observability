@@ -1,0 +1,25 @@
+version: 1
+
+allowed_accounts:
+  - "762012032320"
+
+default_mode: distributed
+
+local_targets:
+  - "762012032320:us-east-1:replication_group:redis-observability-lab"
+
+blocked_targets: []
+
+# Enable only AFTER host AND Pod TLS connectivity have been verified.
+# New Redis are selected dynamically by account + region + VPC + opt-in tag.
+local_networks:
+  - name: client-vpn-sa-pilot
+    enabled: false
+    account_id: "762012032320"
+    region: sa-east-1
+    vpc_id: vpc-0eb95c9e597551a70
+    destination_cidrs:
+      - 172.31.0.0/16
+    required_tags:
+      RedisObservability: enabled
+    allow_authenticated: false

@@ -34,9 +34,73 @@ def select_targets(inventory):
                 if item.get("type") == "cluster"
             }
 
+
+
             for resource in resources:
+
+                # ElastiCache Serverless (Redis / Valkey)
+                if resource.get("type") == "serverless":
+
+                    if resource.get("status") != "available":
+                        continue
+
+                    engine = resource.get("engine")
+
+                    if engine not in ("redis", "valkey"):
+                        continue
+
+                    primary = next(
+                        (
+                            ep
+                            for ep in resource.get("endpoints", [])
+                            if ep.get("role") == "primary"
+                        ),
+                        None,
+                    )
+
+                    if not primary:
+                        continue
+
+                    identifier = (
+                        f"{account_id}:{region_name}:"
+                        f"serverless:{resource['id']}"
+                    )
+
+                    if identifier in seen:
+                        continue
+
+                    seen.add(identifier)
+
+                    targets.append({
+                        "id": identifier,
+                        "account_id": account_id,
+                        "region": region_name,
+                        "replication_group_id": resource["id"],
+                        "engine": engine,
+                        "endpoint": (
+                            f"{primary['address']}:"
+                            f"{primary['port']}"
+                        ),
+                        "endpoint_role": "primary",
+                        "tls": True,
+                        # Absence of a UserGroup alone does not authorize noauth.
+                        "auth_required": serverless_auth(resource),
+                        "vpc_id": resource.get("vpc_id"),
+                        "tags": resource.get("tags", {}),
+                        "aws_resource_type": "serverless",
+                        "labels": {
+                            **resource.get("labels", {}),
+                            "aws_resource_type": "serverless",
+                        },
+                    })
+
+                    continue
+
+                # ElastiCache baseado em nos (logica existente)
                 if resource.get("type") != "replication_group":
                     continue
+
+
 
                 if resource.get("status") != "available":
                     continue
@@ -107,6 +171,8 @@ def select_targets(inventory):
                     "engine": engine,
                     "endpoint": endpoint,
                     "endpoint_role": "primary",
+                    "aws_resource_type": "replication_group",
+                    "tags": resource.get("tags", {}),
                     "tls": resource.get(
                         "transit_encryption"
                     ),
@@ -119,6 +185,15 @@ def select_targets(inventory):
                 })
 
     return sorted(targets, key=lambda t: t["id"])
+
+
+def serverless_auth(resource):
+    mode = resource.get("tags", {}).get("RedisObservabilityAuth")
+    if mode == "noauth" and not resource.get("user_group_id"):
+        return False
+    if mode == "secret":
+        return True
+    return None
 
 
 def main():
