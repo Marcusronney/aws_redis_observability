@@ -1,11 +1,13 @@
-# Coleta AWS no Prometheus do Kind — piloto preparado
+# Coleta AWS no Prometheus do Kind — piloto testado e removido
 
-Estado em 22/10/2026: **código preparado; implantação não autorizada**. O usuário
-escolheu somente código e documentação após receber a estimativa de custos.
-Nenhum endpoint Client VPN foi criado. Não houve aplicação de manifests,
-alteração de firewall, troca de imagem, importação de certificados ou migração
-de coletores. Apenas a branch Git foi criada na VM; a inspeção operacional foi
-somente leitura. Não considerar o exercício concluído operacionalmente.
+Estado em 22/10/2026: **piloto temporário validado e removido**, conforme a
+autorização posterior do usuário. VM e Pod acessaram os dois Valkey de São
+Paulo com TLS; o Prometheus local recebeu `redis_up=1` e o discovery foi
+idempotente. O Terraform removeu os nove recursos exclusivos da VPN; os dois
+certificados ACM do teste também foram removidos. CronJob e ConfigMap foram
+restaurados exatamente. Redis, ECS/AMP e WireGuard existentes foram preservados.
+Consulte o [relatório e as evidências](CLIENT_VPN_RESULTADO.md).
+O exercício completo ainda tem os requisitos pendentes indicados ao final.
 
 ## Ambiente inspecionado
 
@@ -79,8 +81,8 @@ a **US$ 146/mês**, ou US$ 4,80 por 24 h, antes de IPv4 público aplicável,
 CloudWatch, transferência, impostos e câmbio. Desconectar o cliente não remove
 a cobrança da associação. Reconsultar o catálogo antes de implantar.
 
-**A implantação abaixo exige uma futura aprovação explícita dos recursos
-cobrados. Ela não foi dada nesta sessão.**
+**O piloto temporário foi autorizado e encerrado. Uma nova implantação exige
+nova autorização de custos; o roteiro abaixo fica como procedimento reproduzível.**
 
 ## Implantação futura — executar sequencialmente na VM
 
@@ -129,6 +131,7 @@ server_arn=$(aws acm import-certificate --region sa-east-1 \
 printf '%s\n' "$server_arn" > /etc/redis-observability/client-vpn/acm-server-arn
 export TF_VAR_server_certificate_arn="$server_arn"
 export TF_VAR_client_root_certificate_chain_arn="$server_arn"
+export TF_VAR_client_public_cidr="$(curl -fsS https://checkip.amazonaws.com)/32"
 terraform -chdir=terraform/environments/client-vpn init
 terraform -chdir=terraform/environments/client-vpn plan -out=pilot.tfplan
 # Revisar: uma associação, sem destruição/substituição de recursos existentes.
@@ -140,6 +143,12 @@ servidor para a cadeia de autenticação. A chave do cliente permanece na VM.
 Guardar a CA/chaves fora do Git com permissões 0700/0600; não executar com
 `set -x`. Planejar renovação dos certificados de 365 dias e revogação do cliente
 em caso de comprometimento. Não usar a CA de Roles Anywhere como CA desta VPN.
+
+O transporte padrão agora é TCP 443. No teste, UDP saiu da VM sem resposta;
+a troca de protocolo exige recriar o endpoint AWS. A regra de transporte no SG
+fica limitada ao IPv4 público `/32` observado. O gerador foi corrigido para
+incluir `keyUsage` e `extendedKeyUsage` nos certificados; a conexão real validou
+CA, nome, KU e EKU, sem desabilitar verificação TLS.
 
 ### 3. OpenVPN, split tunnel e systemd
 
@@ -331,18 +340,23 @@ não elimina a cobrança da associação AWS.
 
 ## Evidências e limites de aceite
 
-Executado nesta sessão: inspeção SSH/AWS somente leitura; autenticação admin
-temporária confirmada; inventário real sem erros; fontes operacionais
-reaproveitados; testes Python locais e validação estática Terraform.
+Executado: Terraform apply e destroy reais; cliente OpenVPN TCP; PONG com TLS
+1.3 na VM e PING/TLS no Pod; imagem v6 carregada nos nós; dois Jobs reais de
+discovery, com quatro `UNCHANGED` no segundo; Prometheus local saudável nos
+três recursos de aceite; AMP com os três recursos de São Paulo saudáveis;
+rollback e confirmação de state vazio, endpoint/SG/certificados ausentes.
+Nenhuma regra adicional de firewall/NAT no host foi necessária: o MASQUERADE
+Docker existente já permitiu o tráfego dos Pods. Foram executados 45 testes
+na VM; a suíte local passou com 47, incluindo os testes de segurança do rollback.
 
-Ainda não executado: geração/importação de certificados, terraform plan com
-credenciais e certificados reais, apply da VPN, cliente OpenVPN, PING do host
-ou Pod em São Paulo, build da imagem v6, alteração do CronJob, redis_up local
-em São Paulo, validação recente de Virgínia/AMP, failover e segunda conta.
+Ainda não homologado: failover real, segunda conta, SLO ponta a ponta de cinco
+minutos e suporte de memória Serverless via exporter. `INFO memory` retornou
+string vazia no Serverless; `redis_memory_used_bytes` foi observado apenas no
+recurso baseado em nós de Virgínia. Não substituir essa ausência por zero.
 
 O exercício original também exige Vault, remoção automática de targets,
 cluster mode, Sentinel e prazo ponta a ponta de cinco minutos. Este piloto
-prepara conectividade/centralização de Serverless noauth; **não implementa nem
+validou conectividade/centralização de Serverless noauth; **não implementa nem
 homologa esses requisitos restantes**. Auth continua usando o exporter AWS já
 existente para Virgínia. A rota nova recusa targets autenticados até existir
 mapeamento Vault → Secret → exporter homologado. STALE não é excluído, evitando

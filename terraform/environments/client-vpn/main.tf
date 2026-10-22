@@ -37,6 +37,23 @@ variable "client_cidr" {
   description = "Validate against host, Docker, Pods, Services, WireGuard and AWS networks before apply."
   default     = "172.28.240.0/22"
 }
+variable "client_public_cidr" {
+  type        = string
+  description = "Public IPv4 /32 of the Rocky network, permitted only to the VPN transport port."
+  validation {
+    condition     = can(cidrhost(var.client_public_cidr, 0)) && endswith(var.client_public_cidr, "/32")
+    error_message = "Use only the observed public IPv4 /32, never a public catch-all rule."
+  }
+}
+variable "transport_protocol" {
+  type        = string
+  default     = "tcp"
+  description = "TCP 443 is preferable when the client network filters UDP. Changing it replaces the pilot endpoint."
+  validation {
+    condition     = contains(["tcp", "udp"], var.transport_protocol)
+    error_message = "Use tcp or udp."
+  }
+}
 
 data "aws_vpc" "existing" {
   id = "vpc-0eb95c9e597551a70"
@@ -49,6 +66,15 @@ resource "aws_security_group" "vpn" {
   name_prefix = "redis-client-vpn-lab-"
   description = "Exclusive Client VPN lab security group"
   vpc_id      = data.aws_vpc.existing.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "vpn_transport" {
+  security_group_id = aws_security_group.vpn.id
+  cidr_ipv4         = var.client_public_cidr
+  ip_protocol       = var.transport_protocol
+  from_port         = 443
+  to_port           = 443
+  description       = "VPN transport from the exclusive Rocky network"
 }
 
 resource "aws_vpc_security_group_egress_rule" "redis" {
@@ -82,7 +108,7 @@ resource "aws_ec2_client_vpn_endpoint" "lab" {
   server_certificate_arn = var.server_certificate_arn
   client_cidr_block      = var.client_cidr
   split_tunnel           = true
-  transport_protocol     = "udp"
+  transport_protocol     = var.transport_protocol
   vpn_port               = 443
   vpc_id                 = data.aws_vpc.existing.id
   security_group_ids     = [aws_security_group.vpn.id]

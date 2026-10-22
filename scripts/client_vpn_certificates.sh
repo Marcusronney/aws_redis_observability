@@ -16,9 +16,9 @@ for identity in server rocky-192-168-3-55; do
   openssl genrsa -out "$identity.key" 2048
   openssl req -new -key "$identity.key" -out "$identity.csr" -subj "/CN=$identity"
   if [[ "$identity" == server ]]; then
-    printf 'extendedKeyUsage=serverAuth\nsubjectAltName=DNS:server\n' > "$identity.ext"
+    printf 'basicConstraints=CA:FALSE\nkeyUsage=digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\nsubjectAltName=DNS:server\n' > "$identity.ext"
   else
-    printf 'extendedKeyUsage=clientAuth\n' > "$identity.ext"
+    printf 'basicConstraints=CA:FALSE\nkeyUsage=digitalSignature\nextendedKeyUsage=clientAuth\n' > "$identity.ext"
   fi
   openssl x509 -req -sha256 -in "$identity.csr" -CA ca.crt -CAkey ca.key \
     -CAcreateserial -out "$identity.crt" -days 365 -extfile "$identity.ext"

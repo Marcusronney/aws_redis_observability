@@ -17,6 +17,7 @@ spec:
             redis-observability-v5-e2e-ob1yxa.serverless.sae1.cache.amazonaws.com; do
             nslookup "$endpoint"
             test "$(redis-cli --tls -h "$endpoint" -p 6379 PING)" = PONG
+            echo "$endpoint PONG (TLS)"
           done
       resources:
         requests:

@@ -1,0 +1,142 @@
+{
+  "checked_at_utc": "2026-10-22T18:40:40.769666+00:00",
+  "terraform_resources_remaining": 0,
+  "client_vpn_endpoints_remaining": 0,
+  "vpn_security_group_removed": true,
+  "certificates": [
+    {
+      "arn": "arn:aws:acm:sa-east-1:762012032320:certificate/d853318e-b727-422f-be64-dd488b50bd9f",
+      "removed": true
+    },
+    {
+      "arn": "arn:aws:acm:sa-east-1:762012032320:certificate/1fe6ff31-d97f-4ff9-a90a-029a586f6027",
+      "removed": true
+    }
+  ],
+  "openvpn_inactive": true,
+  "tunnel_interface_removed": true,
+  "cronjob_spec_restored_exactly": true,
+  "configmap_data_restored_exactly": true,
+  "ecs_services_unchanged": true,
+  "serverless_caches_preserved": [
+    "redis-observability-sa-test",
+    "redis-observability-v5-demo-02",
+    "redis-observability-v5-e2e"
+  ],
+  "prometheus_after": {
+    "active_aws_targets": [
+      {
+        "labels": {
+          "authentication": "true",
+          "aws_account_id": "762012032320",
+          "aws_region": "us-east-1",
+          "cost_center": "1050",
+          "discovery_type": "aws",
+          "engine": "valkey",
+          "environment": "lab",
+          "instance": "rediss://master.redis-observability-lab.f5usda.use1.cache.amazonaws.com:6379",
+          "job": "redis-aws",
+          "project": "aws-redis-observability"
+        },
+        "health": "up",
+        "lastError": ""
+      }
+    ],
+    "query": {
+      "status": "success",
+      "data": {
+        "resultType": "vector",
+        "result": [
+          {
+            "metric": {
+              "__name__": "redis_up",
+              "authentication": "true",
+              "aws_account_id": "762012032320",
+              "aws_region": "us-east-1",
+              "cost_center": "1050",
+              "discovery_type": "aws",
+              "engine": "valkey",
+              "environment": "lab",
+              "instance": "rediss://master.redis-observability-lab.f5usda.use1.cache.amazonaws.com:6379",
+              "job": "redis-aws",
+              "project": "aws-redis-observability"
+            },
+            "value": [
+              1792694276.629,
+              "1"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "amp_after": {
+    "status": "success",
+    "data": {
+      "resultType": "vector",
+      "result": [
+        {
+          "metric": {
+            "__name__": "redis_up",
+            "aws_account_id": "762012032320",
+            "aws_region": "sa-east-1",
+            "aws_resource_type": "serverless",
+            "business_unit": "technology",
+            "cost_center": "4050",
+            "engine": "valkey",
+            "environment": "homologation",
+            "instance": "127.0.0.1:9121",
+            "job": "redis-aws-distributed",
+            "otel_scope_name": "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver",
+            "otel_scope_version": "v0.50.0",
+            "project": "aws-redis-observability",
+            "redis_name": "redis-observability-sa-test"
+          },
+          "value": [
+            1792694152,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_up",
+            "aws_account_id": "762012032320",
+            "aws_region": "sa-east-1",
+            "aws_resource_type": "serverless",
+            "cost_center": "4050",
+            "environment": "homologation",
+            "instance": "127.0.0.1:9121",
+            "job": "redis-aws-distributed",
+            "otel_scope_name": "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver",
+            "otel_scope_version": "v0.50.0",
+            "project": "aws-redis-observability",
+            "redis_name": "redis-observability-v5-e2e"
+          },
+          "value": [
+            1792694152,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_up",
+            "aws_account_id": "762012032320",
+            "aws_region": "sa-east-1",
+            "aws_resource_type": "serverless",
+            "environment": "homologation",
+            "instance": "127.0.0.1:9121",
+            "job": "redis-aws-distributed",
+            "otel_scope_name": "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver",
+            "otel_scope_version": "v0.50.0",
+            "project": "aws-redis-observability",
+            "redis_name": "redis-observability-v5-demo-02"
+          },
+          "value": [
+            1792694152,
+            "1"
+          ]
+        }
+      ]
+    }
+  }
+}

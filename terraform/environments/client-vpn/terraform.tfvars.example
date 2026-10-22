@@ -3,3 +3,5 @@ server_certificate_arn              = "arn:aws:acm:sa-east-1:762012032320:certif
 # the exclusive lab CA. Do not import the Rocky private key into ACM.
 client_root_certificate_chain_arn   = "arn:aws:acm:sa-east-1:762012032320:certificate/REPLACE"
 client_cidr                        = "172.28.240.0/22"
+client_public_cidr                 = "REPLACE_WITH_OBSERVED_PUBLIC_IPV4/32"
+transport_protocol                 = "tcp"

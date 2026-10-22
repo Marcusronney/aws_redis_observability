@@ -1,0 +1,125 @@
+{
+  "validated_at_utc": "2026-10-22T18:33:13.785407+00:00",
+  "transport": "tcp/443",
+  "host": [
+    {
+      "endpoint": "redis-observability-sa-test-ob1yxa.serverless.sae1.cache.amazonaws.com",
+      "response": "+PONG",
+      "tls": "TLSv1.3"
+    },
+    {
+      "endpoint": "redis-observability-v5-e2e-ob1yxa.serverless.sae1.cache.amazonaws.com",
+      "response": "+PONG",
+      "tls": "TLSv1.3"
+    }
+  ],
+  "pod": {
+    "name": "redis-client-vpn-check",
+    "phase": "Succeeded",
+    "pod_ip": "10.244.1.251",
+    "exit_code": 0
+  },
+  "redis_metrics": [
+    {
+      "labels": {
+        "__name__": "redis_up",
+        "authentication": "true",
+        "aws_account_id": "762012032320",
+        "aws_region": "us-east-1",
+        "aws_resource_type": "replication_group",
+        "cost_center": "1050",
+        "discovery_type": "aws",
+        "engine": "valkey",
+        "environment": "lab",
+        "instance": "rediss://master.redis-observability-lab.f5usda.use1.cache.amazonaws.com:6379",
+        "job": "redis-aws",
+        "project": "aws-redis-observability",
+        "redis_name": "redis-observability-lab"
+      },
+      "redis_up": "1",
+      "sample_age_seconds": 31.030999898910522
+    },
+    {
+      "labels": {
+        "__name__": "redis_up",
+        "authentication": "false",
+        "aws_account_id": "762012032320",
+        "aws_region": "sa-east-1",
+        "aws_resource_type": "serverless",
+        "cost_center": "4050",
+        "discovery_type": "aws",
+        "engine": "valkey",
+        "environment": "homologation",
+        "instance": "rediss://redis-observability-v5-e2e-ob1yxa.serverless.sae1.cache.amazonaws.com:6379",
+        "job": "redis-aws",
+        "project": "aws-redis-observability",
+        "redis_name": "redis-observability-v5-e2e"
+      },
+      "redis_up": "1",
+      "sample_age_seconds": 27.67199993133545
+    },
+    {
+      "labels": {
+        "__name__": "redis_up",
+        "authentication": "false",
+        "aws_account_id": "762012032320",
+        "aws_region": "sa-east-1",
+        "aws_resource_type": "serverless",
+        "discovery_type": "aws",
+        "engine": "valkey",
+        "environment": "homologation",
+        "instance": "rediss://redis-observability-v5-demo-02-ob1yxa.serverless.sae1.cache.amazonaws.com:6379",
+        "job": "redis-aws",
+        "redis_name": "redis-observability-v5-demo-02"
+      },
+      "redis_up": "1",
+      "sample_age_seconds": 26.734999895095825
+    },
+    {
+      "labels": {
+        "__name__": "redis_up",
+        "authentication": "false",
+        "aws_account_id": "762012032320",
+        "aws_region": "sa-east-1",
+        "aws_resource_type": "serverless",
+        "business_unit": "technology",
+        "cost_center": "4050",
+        "discovery_type": "aws",
+        "engine": "valkey",
+        "environment": "homologation",
+        "instance": "rediss://redis-observability-sa-test-ob1yxa.serverless.sae1.cache.amazonaws.com:6379",
+        "job": "redis-aws",
+        "owner": "redis-discovery-test",
+        "project": "aws-redis-observability",
+        "redis_name": "redis-observability-sa-test"
+      },
+      "redis_up": "1",
+      "sample_age_seconds": 19.2260000705719
+    }
+  ],
+  "idempotence": [
+    "UNCHANGED: auto-aws-0fea88c6b524",
+    "UNCHANGED: auto-aws-4b8dc0662a7f",
+    "UNCHANGED: auto-aws-de7d29a594f1",
+    "UNCHANGED: auto-aws-f6372ce604ed"
+  ],
+  "ecs_preserved": [
+    {
+      "name": "redis-observability-sa-test",
+      "desired": 1,
+      "running": 1
+    },
+    {
+      "name": "redis-collector-4b8dc0662a7f",
+      "desired": 1,
+      "running": 1
+    },
+    {
+      "name": "redis-collector-de7d29a594f1",
+      "desired": 1,
+      "running": 1
+    }
+  ],
+  "memory_observation": "INFO memory on Serverless returned an empty bulk string; redis_memory_used_bytes was present only for node-based Virginia.",
+  "extra_demo_observation": "demo-02 was healthy but has no project AWS tag; no business tag was invented."
+}
