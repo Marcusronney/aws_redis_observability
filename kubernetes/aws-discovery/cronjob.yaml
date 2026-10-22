@@ -33,7 +33,7 @@ metadata:
     app.kubernetes.io/part-of: redis-observability
 spec:
   schedule: '*/5 * * * *'
-  suspend: true
+  suspend: false
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
@@ -101,6 +101,9 @@ spec:
               readOnly: true
             - name: tmp
               mountPath: /tmp
+            - name: controller-files
+              mountPath: /app/discovery/config
+              readOnly: true
           volumes:
           - name: aws-config
             configMap:
@@ -111,3 +114,6 @@ spec:
               defaultMode: 288
           - name: tmp
             emptyDir: {}
+          - name: controller-files
+            configMap:
+              name: redis-discovery-controller-files
