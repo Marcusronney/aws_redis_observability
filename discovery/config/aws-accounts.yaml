@@ -1,17 +1,15 @@
-
 accounts:
-  - name: estudos
-    account_id: "762012032320"
-    profile: redis-discovery
-
-    regions:
-      - us-east-1
-      - sa-east-1
+- name: estudos
+  account_id: '762012032320'
+  profile: redis-discovery
+  regions:
+  - us-east-1
+  - sa-east-1
+  provision_role_arn: arn:aws:iam::762012032320:role/RedisObservabilityProvisionRole
 tag_labels:
   Project: project
   Environment: environment
   CostCenter: cost_center
-
   project: project
   environment: environment
   cost_center: cost_center
