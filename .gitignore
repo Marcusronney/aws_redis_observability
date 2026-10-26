@@ -56,6 +56,9 @@ Thumbs.db
 __pycache__/
 *.pyc
 .work-vpn/
+.work-vault/
+redis-vault-source.tgz
+**/vault-init.json
 redis-vpn-source.tgz
 *.ovpn
 *.crt

@@ -83,6 +83,14 @@ class TestAWSTargets(unittest.TestCase):
             "valkey",
         )
 
+    def test_rbac_cannot_be_misclassified_as_noauth(self):
+        inventory = self.make_inventory()
+        group = inventory['accounts'][0]['regions'][0]['resources'][1]
+        group.update(auth_token_enabled=False, user_group_ids=['acl-users'])
+        self.assertIsNone(select_targets(inventory)[0]['auth_required'])
+        group['tags'] = {'RedisObservabilityAuth': 'secret'}
+        self.assertIs(select_targets(inventory)[0]['auth_required'], True)
+
     def test_incomplete_discovery_fails(self):
         inventory = self.make_inventory()
         inventory["errors"] = [

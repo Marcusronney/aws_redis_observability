@@ -42,6 +42,3 @@ A solução precisa considerar:
 Não vale cadastrar os Redis manualmente.
 
 Quero que você desenhe e implemente essa solução de forma realmente dinâmica, e não apenas um script que funcione para uma lista fixa de Redis.
-
-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
-

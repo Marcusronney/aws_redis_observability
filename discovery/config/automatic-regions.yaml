@@ -1,0 +1,23 @@
+# Authorized accounts only. No passwords, private keys or AWS access keys.
+enabled: true
+namespace: redis-vault-lab
+kube_context: kind-redis-monitoring
+state_directory: /root/redis-network-automation
+gateway:
+  account_id: '762012032320'
+  region: us-east-1
+  instance_id: i-0f18f326bfde065db
+  vpc_id: vpc-086678957273bf941
+  profile: redis-network-automation
+  wireguard_interface: wg0
+# Account catalog is loaded through baseline_accounts below (same source as the Pod).
+# Enable only after applying the OU network role and central AssumeRole policy.
+cross_account_network: true
+member_network_role_name: RedisObservabilityOUNetworkRole
+required_tags:
+  RedisObservability: vault-lab
+max_networks: 8
+exclude_regions: []
+exclude_vpcs: []
+baseline_accounts: discovery/config/vault-local-accounts.yaml
+baseline_routing: discovery/config/vault-local-routing.yaml

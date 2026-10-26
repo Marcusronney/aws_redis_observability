@@ -1,4 +1,10 @@
 .git/
+.aws/
+.codex/
+.agents/
+.work-vault/
+.work-vpn/
+**/*.ovpn
 .venv/
 **/.terraform/
 **/*.tfstate

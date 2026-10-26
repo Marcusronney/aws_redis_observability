@@ -54,6 +54,9 @@ def normalize_cluster(resource, labels):
 
     return {
         "type": "cluster",
+        "nodes": [{'node_id': node['CacheNodeId'],
+                   'endpoint': normalize_endpoint(node.get('Endpoint'))}
+                  for node in resource.get('CacheNodes', []) if node.get('CacheNodeId')],
         "id": resource["CacheClusterId"],
         "arn": resource.get("ARN"),
         "engine": resource.get("Engine"),
@@ -61,6 +64,7 @@ def normalize_cluster(resource, labels):
         "replication_group_id": resource.get(
             "ReplicationGroupId"
         ),
+        "cache_subnet_group": resource.get("CacheSubnetGroupName"),
         "transit_encryption": resource.get(
             "TransitEncryptionEnabled"
         ),
@@ -74,6 +78,7 @@ def normalize_cluster(resource, labels):
 
 def normalize_replication_group(resource, labels):
     endpoints = []
+    nodes = []
 
     add_endpoint(
         endpoints,
@@ -103,6 +108,13 @@ def normalize_replication_group(resource, labels):
         )
 
         for member in group.get("NodeGroupMembers", []):
+            endpoint = normalize_endpoint(member.get('ReadEndpoint'))
+            if member.get('CacheClusterId') and member.get('CacheNodeId'):
+                nodes.append({
+                    'cluster_id': member['CacheClusterId'], 'node_id': member['CacheNodeId'],
+                    'endpoint': endpoint, 'role': member.get('CurrentRole', 'unknown'),
+                    'availability_zone': member.get('PreferredAvailabilityZone', 'unknown'),
+                    'shard_id': shard_id})
             add_endpoint(
                 endpoints,
                 member.get("ReadEndpoint"),
@@ -111,6 +123,8 @@ def normalize_replication_group(resource, labels):
 
     return {
         "type": "replication_group",
+        "nodes": nodes,
+        "user_group_ids": resource.get("UserGroupIds", []),
         "id": resource["ReplicationGroupId"],
         "arn": resource.get("ARN"),
         "status": resource.get("Status"),

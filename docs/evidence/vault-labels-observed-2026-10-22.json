@@ -1,0 +1,35 @@
+{
+  "expected": "present",
+  "resource": "redis-vault-lifecycle-test",
+  "namespace": "redis-vault-lab",
+  "started_at": "2026-10-22T19:40:31.656858+00:00",
+  "first_observed_available_at": "2026-10-22T19:40:33.770295+00:00",
+  "metrics": [
+    {
+      "metric": {
+        "__name__": "redis_up",
+        "authentication": "true",
+        "aws_account_id": "762012032320",
+        "aws_region": "us-east-1",
+        "aws_resource_type": "replication_group",
+        "cost_center": "vault-test-after",
+        "discovery_type": "aws",
+        "engine": "valkey",
+        "environment": "temporary-test",
+        "instance": "rediss://default@master.redis-vault-lifecycle-test.f5usda.use1.cache.amazonaws.com:6379",
+        "job": "redis-aws",
+        "project": "redis-observability",
+        "redis_name": "redis-vault-lifecycle-test"
+      },
+      "value": [
+        1792698412.986,
+        "1"
+      ]
+    }
+  ],
+  "active_targets": 1,
+  "scrapeconfigs": 1,
+  "seconds_from_first_observed_available": 379.22,
+  "passed": true,
+  "completed_at": "2026-10-22T19:46:52.987197+00:00"
+}

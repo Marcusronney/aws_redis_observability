@@ -1,0 +1,11 @@
+# Requires a real Organization, trusted access for StackSets, and admin authorization.
+management_profile    = "organization-admin"
+management_account_id = "REPLACE_WITH_ADMIN_ACCOUNT"
+organization_id       = "o-REPLACE"
+ou_ids                = ["ou-REPLACE"]
+member_role_name       = "RedisObservabilityOUDiscoveryRole"
+trusted_principal_arns = [
+  "arn:aws:iam::762012032320:role/RedisObservabilityDiscoveryRole",
+  "arn:aws:iam::762012032320:role/RedisObservabilityNetworkAutomationRole"
+]
+# call_as = "DELEGATED_ADMIN" # Only from a delegated administrator.

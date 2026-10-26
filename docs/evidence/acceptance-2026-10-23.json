@@ -1,0 +1,287 @@
+{
+  "generated_at": "2026-10-23T13:44:18.293090+00:00",
+  "unit_tests_passed": 73,
+  "linux_unit_tests_passed": 73,
+  "terraform_validate": true,
+  "current_exporter_passwords_absent_from_managed_states": true,
+  "state_files_checked": 4,
+  "markers": {
+    "FULL_ACCEPTANCE_OK": true,
+    "ROTATION_FINALIZED_OK": true,
+    "WRONG_PASSWORD_FAIL_CLOSED_OK": true,
+    "CREDENTIAL_RECOVERY_OK": true
+  },
+  "controller_image_id": "sha256:e7a5d2619c18e59f13410db9989bf249905e568905b9cce8139a1481596b45ed",
+  "observations": {
+    "creation-observed": {
+      "expected": "present",
+      "resource": "redis-vault-lifecycle-test",
+      "namespace": "redis-vault-lab",
+      "started_at": "2026-10-23T12:38:34.955396+00:00",
+      "first_observed_available_at": "2026-10-23T12:38:37.569111+00:00",
+      "metrics": [
+        {
+          "metric": {
+            "__name__": "redis_up",
+            "authentication": "true",
+            "aws_account_id": "762012032320",
+            "aws_region": "us-east-1",
+            "aws_resource_type": "replication_group",
+            "cost_center": "vault-test-before",
+            "discovery_type": "aws",
+            "engine": "valkey",
+            "environment": "temporary-test",
+            "instance": "rediss://default@master.redis-vault-lifecycle-test.f5usda.use1.cache.amazonaws.com:6379",
+            "job": "redis-aws",
+            "project": "redis-observability",
+            "redis_name": "redis-vault-lifecycle-test"
+          },
+          "value": [
+            1792759234.317,
+            "1"
+          ]
+        }
+      ],
+      "active_targets": 1,
+      "scrapeconfigs": 1,
+      "seconds_from_first_observed_available": 116.75,
+      "passed": true,
+      "completed_at": "2026-10-23T12:40:34.318157+00:00"
+    },
+    "labels-observed": {
+      "expected": "present",
+      "resource": "redis-vault-lifecycle-test",
+      "namespace": "redis-vault-lab",
+      "started_at": "2026-10-23T12:42:10.882171+00:00",
+      "first_observed_available_at": "2026-10-23T12:42:12.913087+00:00",
+      "metrics": [
+        {
+          "metric": {
+            "__name__": "redis_up",
+            "authentication": "true",
+            "aws_account_id": "762012032320",
+            "aws_region": "us-east-1",
+            "aws_resource_type": "replication_group",
+            "cost_center": "vault-test-after",
+            "discovery_type": "aws",
+            "engine": "valkey",
+            "environment": "temporary-test",
+            "instance": "rediss://default@master.redis-vault-lifecycle-test.f5usda.use1.cache.amazonaws.com:6379",
+            "job": "redis-aws",
+            "project": "redis-observability",
+            "redis_name": "redis-vault-lifecycle-test"
+          },
+          "value": [
+            1792759402.254,
+            "1"
+          ]
+        }
+      ],
+      "active_targets": 1,
+      "scrapeconfigs": 1,
+      "seconds_from_first_observed_available": 69.34,
+      "passed": true,
+      "completed_at": "2026-10-23T12:43:22.255337+00:00"
+    },
+    "rotation-secure": {
+      "job": "vault-security-1792759623",
+      "secret_resource_version": "1532305",
+      "generation_acknowledged": true,
+      "vault_equals_projected_credential": true,
+      "old_password_rejected": true,
+      "new_password_accepted": true,
+      "auth_strategy": "SET"
+    },
+    "reactivation-observed": {
+      "expected": "present",
+      "resource": "redis-vault-lifecycle-test",
+      "namespace": "redis-vault-lab",
+      "started_at": "2026-10-23T12:53:45.677198+00:00",
+      "first_observed_available_at": "2026-10-23T12:53:48.861236+00:00",
+      "metrics": [
+        {
+          "metric": {
+            "__name__": "redis_up",
+            "authentication": "true",
+            "aws_account_id": "762012032320",
+            "aws_region": "us-east-1",
+            "aws_resource_type": "replication_group",
+            "cost_center": "vault-test-after",
+            "discovery_type": "aws",
+            "engine": "valkey",
+            "environment": "temporary-test",
+            "instance": "rediss://default@master.redis-vault-lifecycle-test.f5usda.use1.cache.amazonaws.com:6379",
+            "job": "redis-aws",
+            "project": "redis-observability",
+            "redis_name": "redis-vault-lifecycle-test"
+          },
+          "value": [
+            1792760092.654,
+            "1"
+          ]
+        }
+      ],
+      "active_targets": 1,
+      "scrapeconfigs": 1,
+      "seconds_from_first_observed_available": 63.79,
+      "passed": true,
+      "completed_at": "2026-10-23T12:54:52.655705+00:00"
+    },
+    "deletion-observed": {
+      "expected": "absent",
+      "resource": "redis-vault-lifecycle-test",
+      "namespace": "redis-vault-lab",
+      "started_at": "2026-10-23T12:58:52.869425+00:00",
+      "aws_absent": true,
+      "scrapeconfigs": 0,
+      "active_targets": 0,
+      "credential_entry_removed": true,
+      "passed": true,
+      "completed_at": "2026-10-23T13:02:43.745292+00:00"
+    },
+    "aws-reactivation-observed": {
+      "expected": "present",
+      "resource": "redis-vault-lifecycle-test",
+      "namespace": "redis-vault-lab",
+      "started_at": "2026-10-23T13:08:57.058458+00:00",
+      "first_observed_available_at": "2026-10-23T13:08:59.234068+00:00",
+      "metrics": [
+        {
+          "metric": {
+            "__name__": "redis_up",
+            "authentication": "true",
+            "aws_account_id": "762012032320",
+            "aws_region": "us-east-1",
+            "aws_resource_type": "replication_group",
+            "cost_center": "vault-test-before",
+            "discovery_type": "aws",
+            "engine": "valkey",
+            "environment": "temporary-test",
+            "instance": "rediss://default@master.redis-vault-lifecycle-test.f5usda.use1.cache.amazonaws.com:6379",
+            "job": "redis-aws",
+            "project": "redis-observability",
+            "redis_name": "redis-vault-lifecycle-test"
+          },
+          "value": [
+            1792761123.441,
+            "1"
+          ]
+        }
+      ],
+      "active_targets": 1,
+      "scrapeconfigs": 1,
+      "seconds_from_first_observed_available": 184.21,
+      "passed": true,
+      "completed_at": "2026-10-23T13:12:03.444298+00:00"
+    },
+    "final-deletion-observed": {
+      "expected": "absent",
+      "resource": "redis-vault-lifecycle-test",
+      "namespace": "redis-vault-lab",
+      "started_at": "2026-10-23T13:16:11.012361+00:00",
+      "aws_absent": true,
+      "scrapeconfigs": 0,
+      "active_targets": 0,
+      "credential_entry_removed": true,
+      "passed": true,
+      "completed_at": "2026-10-23T13:19:18.248102+00:00"
+    },
+    "final-nodes-pool": {
+      "passed": true,
+      "verified_at": "2026-10-23T13:37:34.782127+00:00",
+      "namespace": "redis-vault-lab",
+      "redis_name": "redis-observability-lab",
+      "scrapeconfigs": 1,
+      "nodes_required": true,
+      "metrics": [
+        {
+          "metric": {
+            "__name__": "redis_up",
+            "authentication": "true",
+            "availability_zone": "us-east-1b",
+            "aws_account_id": "762012032320",
+            "aws_region": "us-east-1",
+            "aws_resource_type": "replication_group",
+            "cost_center": "1050",
+            "discovery_type": "aws",
+            "engine": "valkey",
+            "environment": "lab",
+            "instance": "rediss://default@redis-observability-lab-001.redis-observability-lab.f5usda.use1.cache.amazonaws.com:6379",
+            "job": "redis-aws",
+            "project": "aws-redis-observability",
+            "redis_name": "redis-observability-lab",
+            "redis_node": "redis-observability-lab-001/0001",
+            "redis_role": "primary",
+            "redis_shard": "0001"
+          },
+          "value": [
+            1792762650.426,
+            "1"
+          ]
+        }
+      ],
+      "authenticated_exporters": [
+        {
+          "pod": "exporter-auth-5568b79dbc-rlnbb",
+          "ready": true,
+          "generation_ack": true
+        },
+        {
+          "pod": "exporter-auth-5568b79dbc-tqsdd",
+          "ready": true,
+          "generation_ack": true
+        }
+      ]
+    },
+    "final-validation-result": {
+      "started_at": "2026-10-23T13:36:22.476318+00:00",
+      "verifier_exit": 0,
+      "off_exit": 0,
+      "finished_at": "2026-10-23T13:38:28.857114+00:00"
+    },
+    "final-off-confirmed": {
+      "verified_at": "2026-10-23T13:39:41.252167+00:00",
+      "namespace": "redis-vault-lab",
+      "deployments": {
+        "exporter-auth": 0,
+        "exporter-noauth": 0,
+        "vault": 0
+      },
+      "discovery_suspended": true,
+      "jobs": 0,
+      "owned_scrapeconfigs": 0,
+      "pvc": "Bound",
+      "legacy_cronjobs": {
+        "redis-discovery": true,
+        "redis-discovery-aws": true
+      },
+      "temporary_cache_state_instances": 0,
+      "gateway_state": "stopped",
+      "temporary_cache_aws_absent": true,
+      "existing_caches": [
+        {
+          "region": "us-east-1",
+          "id": "redis-observability-lab",
+          "status": "available"
+        },
+        {
+          "region": "sa-east-1",
+          "id": "redis-observability-sa-test",
+          "status": "available"
+        },
+        {
+          "region": "sa-east-1",
+          "id": "redis-observability-v5-demo-02",
+          "status": "available"
+        },
+        {
+          "region": "sa-east-1",
+          "id": "redis-observability-v5-e2e",
+          "status": "available"
+        }
+      ],
+      "passed": true
+    }
+  },
+  "terraform_off_plan_exit_code": 0
+}

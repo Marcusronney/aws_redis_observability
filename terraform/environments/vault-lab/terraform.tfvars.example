@@ -1,0 +1,14 @@
+# Only public configuration. Never put passwords or tokens here.
+exporter_replicas = 1
+# kube_context = "kind-redis-monitoring"
+# namespace = "redis-vault-lab"
+
+# Optional: manage the existing WireGuard EC2 along with active=true/false.
+# This incurs EC2 charges while ON; EBS/EIP can remain billed while OFF.
+# gateway_instance_id = "i-0f18f326bfde065db"
+# gateway_region = "us-east-1"
+# gateway_account_id = "762012032320"
+# gateway_aws_profile = "redis-observability-admin"
+session_directory = "/root/redis-vault-session"
+# Set to the Python interpreter with requirements-aws.txt installed if needed.
+# python_executable = "/root/projetos/aws_redis_observability/.venv-aws/bin/python"

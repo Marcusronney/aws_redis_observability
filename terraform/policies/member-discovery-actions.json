@@ -1,0 +1,12 @@
+[
+  "elasticache:DescribeCacheClusters",
+  "elasticache:DescribeReplicationGroups",
+  "elasticache:DescribeServerlessCaches",
+  "elasticache:DescribeCacheSubnetGroups",
+  "elasticache:ListTagsForResource",
+  "ec2:DescribeRegions",
+  "ec2:DescribeSubnets",
+  "ec2:DescribeVpcs",
+  "ec2:DescribeRouteTables",
+  "ec2:DescribeSecurityGroups"
+]

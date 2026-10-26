@@ -1,0 +1,50 @@
+{
+  "checked_at": "2026-10-23T11:52:32.199411+00:00",
+  "cronjobs": [
+    {
+      "namespace": "redis-vault-lab",
+      "name": "discovery",
+      "suspended": true,
+      "active_jobs": 0
+    },
+    {
+      "namespace": "redis-observability",
+      "name": "redis-discovery",
+      "suspended": true,
+      "active_jobs": 0
+    },
+    {
+      "namespace": "redis-observability",
+      "name": "redis-discovery-aws",
+      "suspended": true,
+      "active_jobs": 0
+    }
+  ],
+  "lab_deployments": [
+    {
+      "name": "exporter-auth",
+      "replicas": 0,
+      "available": 0
+    },
+    {
+      "name": "exporter-noauth",
+      "replicas": 0,
+      "available": 0
+    },
+    {
+      "name": "vault",
+      "replicas": 0,
+      "available": 0
+    }
+  ],
+  "lab_pvc": [
+    {
+      "name": "vault-data",
+      "phase": "Bound"
+    }
+  ],
+  "aws_admin_check": "TokenRetrievalError",
+  "aws_inventory_fully_verified": false,
+  "temporary_cache_tf_resource_count": 0,
+  "local_pause_confirmed": true
+}

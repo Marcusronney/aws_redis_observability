@@ -1,0 +1,18 @@
+{
+  "feature": "inventory_with_and_without_tags",
+  "tests_passed_locally": 86,
+  "tests_passed_on_vm": 86,
+  "regions_scanned": 17,
+  "observed_cache": {
+    "name": "rediscanada",
+    "region": "ca-central-1",
+    "engine": "valkey",
+    "status": "creating",
+    "inventory_fresh": true,
+    "network_authorized": false,
+    "network_authorization": "tags_unavailable",
+    "collection_status": "not_checked"
+  },
+  "aws_tag_read_error": "InvalidReplicationGroupStateFault",
+  "network_authorization_policy_changed": false
+}

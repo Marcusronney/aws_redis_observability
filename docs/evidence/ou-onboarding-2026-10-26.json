@@ -1,0 +1,37 @@
+{
+  "verified_date": "2026-10-26",
+  "organization_id": "o-nipxlggd11",
+  "ou_id": "ou-m28r-4zfxlwec",
+  "member_account_id": "848349338183",
+  "catalog_source": "organizations",
+  "individual_member_ids_in_catalog": false,
+  "trusted_access_enabled": true,
+  "stackset": "redis-observability-account-onboarding",
+  "stack_instance_status": "CURRENT",
+  "stack_instance_detailed_status": "SUCCEEDED",
+  "auto_deployment_enabled": true,
+  "retain_stacks_on_account_removal": true,
+  "member_role": "RedisObservabilityOUDiscoveryRole",
+  "legacy_manual_role_preserved": true,
+  "role_chaining_actions": ["sts:AssumeRole", "sts:SetSourceIdentity", "sts:TagSession"],
+  "machine_identity_preflight": {"status": "inventory_ready", "regions": 17},
+  "kind_readonly_inventory": {
+    "passed": true,
+    "account_id": "848349338183",
+    "regions": 17,
+    "resources": 0,
+    "errors": [],
+    "temporary_job_and_configmap_removed": true
+  },
+  "tests_passed_locally": 105,
+  "tests_passed_on_vm": 105,
+  "lab_off_verified": {
+    "deployment_replicas": 0,
+    "cronjob_suspended": true,
+    "regional_timer": "inactive",
+    "vpn_instances": "stopped"
+  },
+  "new_caches_or_ec2_created": false,
+  "cross_account_redis_metrics_validated": false,
+  "future_account_auto_deployment_event_tested": false
+}

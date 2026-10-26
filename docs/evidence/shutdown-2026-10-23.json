@@ -1,0 +1,83 @@
+{
+  "verified_at": "2026-10-23T17:21:51.412142-03:00",
+  "account_id": "762012032320",
+  "regions_checked": 17,
+  "inventory_errors": [],
+  "elasticache_groups": 0,
+  "elasticache_serverless": 0,
+  "ec2_running": 0,
+  "ecs_desired": 0,
+  "ecs_running": 0,
+  "preserved_volumes": [
+    {
+      "id": "vol-011350c7d7abbc8e5",
+      "state": "in-use",
+      "size_gib": 8,
+      "tags": [],
+      "instances": [
+        "i-0ed5512ad074e3937"
+      ]
+    },
+    {
+      "id": "vol-0d01db5567b60b497",
+      "state": "in-use",
+      "size_gib": 8,
+      "tags": [],
+      "instances": [
+        "i-0f18f326bfde065db"
+      ]
+    }
+  ],
+  "preserved_elastic_ips": [
+    {
+      "allocation": "eipalloc-09de310d334f22c08",
+      "instance": "i-0f18f326bfde065db",
+      "association": "eipassoc-0b56fa0c0f895b666",
+      "tags": [
+        {
+          "Key": "Name",
+          "Value": "redis-observability-vpn-eip"
+        }
+      ]
+    }
+  ],
+  "preserved_amp": [
+    {
+      "id": "ws-a32bf55d-d10a-4d22-9873-a937f133db67",
+      "arn": "arn:aws:aps:us-east-1:762012032320:workspace/ws-a32bf55d-d10a-4d22-9873-a937f133db67",
+      "alias": "redis-observability-central",
+      "status": {
+        "statusCode": "ACTIVE"
+      }
+    }
+  ],
+  "wireguard_backup_verified": true,
+  "external_instance_terminated": true,
+  "external_volume_deleted": true,
+  "kubernetes": {
+    "deployment_replicas": {
+      "exporter-auth": 0,
+      "exporter-noauth": 0,
+      "vault": 0
+    },
+    "cronjobs_suspended": true,
+    "jobs": 0,
+    "pvc": {
+      "vault-data": "Bound"
+    }
+  },
+  "timer_state": "inactive",
+  "elasticache_cache_clusters": 0,
+  "preserved_instances": [
+    {
+      "id": "i-0ed5512ad074e3937",
+      "state": "stopped"
+    },
+    {
+      "id": "i-0f18f326bfde065db",
+      "state": "stopped"
+    }
+  ],
+  "ecs_running_tasks_all_regions": 0,
+  "extra_inventory_errors": []
+}

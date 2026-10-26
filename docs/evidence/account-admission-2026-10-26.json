@@ -1,0 +1,26 @@
+{
+  "feature": "shared-account-catalog-and-organizations-admission",
+  "tests_passed_locally": 104,
+  "tests_passed_on_vm": 104,
+  "terraform_validated": [
+    "terraform/modules/member-discovery-role",
+    "terraform/environments/account-bootstrap",
+    "terraform/environments/account-access-source",
+    "terraform/environments/organization-onboarding",
+    "terraform/environments/vault-lab"
+  ],
+  "real_accounts_configured": 1,
+  "readonly_access_check": {
+    "account_id": "762012032320",
+    "status": "inventory_ready",
+    "enabled_regions": 17
+  },
+  "two_and_twenty_accounts_tested_with_mock_apis": true,
+  "second_real_account_exists": false,
+  "organizations_live_tested": false,
+  "aws_mutations_applied": false,
+  "cross_account_network_writes_enabled": false,
+  "kind_image_loaded": true,
+  "timer_state": "inactive",
+  "laboratory_state": "OFF"
+}

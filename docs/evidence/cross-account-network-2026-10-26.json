@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-26",
+  "enabled": true,
+  "member_network_role": "RedisObservabilityOUNetworkRole",
+  "assume_role_verified_accounts": ["417140778338", "848349338183"],
+  "stackset_apply_exit": 0,
+  "source_policy_apply_exit": 0,
+  "stackset_drift_plan_exit": 0,
+  "source_policy_drift_plan_exit": 0,
+  "consecutive_cycles": 2,
+  "account_region_scopes_each_cycle": 34,
+  "caches_each_cycle": 0,
+  "network_operations_each_cycle": 0,
+  "errors_each_cycle": 0,
+  "tests_passed_locally_and_on_vm": 109,
+  "terraform_network_link_validated": true,
+  "kind_nodes_ready_after_test": true,
+  "regional_timer_active": true,
+  "configmap_comparison": "incomplete: final API read failed transiently; nodes subsequently Ready",
+  "peering_and_redis_traffic_tested": false,
+  "remaining": "Create an eligible cache, register its credential in Vault, verify peering and redis_up, then repeat the link plan."
+}

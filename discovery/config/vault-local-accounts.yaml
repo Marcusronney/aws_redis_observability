@@ -1,0 +1,14 @@
+# Accounts are admitted through the shared catalog, not this file.
+collect_nodes: true
+catalog_file: account-catalog.yaml
+isolate_failed_scopes: true
+account_workers: 4
+tag_labels:
+  Project: project
+  project: project
+  Environment: environment
+  environment: environment
+  CostCenter: cost_center
+  cost_center: cost_center
+  owner: owner
+  business_unit: business_unit

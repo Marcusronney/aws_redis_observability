@@ -138,25 +138,39 @@ def metric_labels(target):
     return labels
 
 
-def build_scrapeconfig(target):
+def build_scrapeconfig(target, namespace=NAMESPACE, exporters=None, scope=None):
     uri = redis_uri(target)
     auth_required = confirmed_auth(target)
 
-    if target.get("endpoint_role") != "primary":
+    node_endpoint = (
+        target.get('endpoint_kind') == 'node'
+        and target.get('aws_resource_type') == 'replication_group'
+        and target.get('endpoint_role') in ('primary', 'replica', 'unknown')
+        and bool(target.get('labels', {}).get('redis_node'))
+    )
+    if target.get("endpoint_role") != "primary" and not node_endpoint:
         raise ValueError("Somente endpoints primary")
 
     if target.get("engine") not in ("redis", "valkey"):
         raise ValueError("Engine nao suportada")
 
-    exporter = EXPORTER if auth_required else EXPORTER_NOAUTH
+    exporter = (exporters or {True: EXPORTER, False: EXPORTER_NOAUTH})[auth_required]
+    username = target.get("redis_user")
+    if username is not None:
+        if not auth_required or not re.fullmatch(r"[a-zA-Z0-9._-]+", username):
+            raise ValueError("Invalid Redis username")
+        uri = uri.replace("://", f"://{username}@", 1)
+    managed_labels = dict(MANAGED_LABELS)
+    if scope:
+        managed_labels["redis-observability/scope"] = scope
 
     return {
         "apiVersion": "monitoring.coreos.com/v1alpha1",
         "kind": "ScrapeConfig",
         "metadata": {
             "name": scrapeconfig_name(target),
-            "namespace": NAMESPACE,
-            "labels": dict(MANAGED_LABELS),
+            "namespace": namespace,
+            "labels": managed_labels,
             "annotations": {
                 "redis-observability/target-id": target["id"],
             },

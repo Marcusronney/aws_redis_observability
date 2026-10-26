@@ -1,6 +1,7 @@
 
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
+from discovery.aws_discovery.__main__ import discover_region
 
 from discovery.aws_discovery.elasticache import (
     list_paginated,
@@ -14,6 +15,18 @@ from discovery.aws_discovery.normalize import (
 
 
 class TestAWSDiscovery(unittest.TestCase):
+
+    @patch('discovery.aws_discovery.__main__.get_resource_tags', return_value={})
+    @patch('discovery.aws_discovery.__main__.discover_resources')
+    @patch('discovery.aws_discovery.__main__.create_elasticache_client')
+    def test_replication_group_resolves_vpc_for_dynamic_routing(self, make_client, discover, tags):
+        make_client.return_value.describe_cache_subnet_groups.return_value = {
+            'CacheSubnetGroups': [{'VpcId': 'vpc-test'}]}
+        discover.return_value = {'clusters': [{'CacheClusterId': 'node', 'CacheSubnetGroupName': 'private'}],
+            'replication_groups': [{'ReplicationGroupId': 'group', 'MemberClusters': ['node']}], 'serverless': []}
+        resources = discover_region(MagicMock(), 'us-east-1', {})
+        self.assertEqual([r['vpc_id'] for r in resources], ['vpc-test', 'vpc-test'])
+        make_client.return_value.describe_cache_subnet_groups.assert_called_once_with(CacheSubnetGroupName='private')
 
     def test_tag_whitelist(self):
         tags = {

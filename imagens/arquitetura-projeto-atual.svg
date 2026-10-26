@@ -1,0 +1,263 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3200" height="2180" viewBox="0 0 3200 2180">
+<title>AWS Redis Observability — arquitetura implementada</title>
+<desc>Kind externo, Terraform, discovery, Vault, exporters, IAM, APIs e conectividade AWS. Expansão inter-regional ainda não homologada.</desc>
+<rect x="0" y="0" width="3200" height="2180" rx="0" fill="#F4F7FC" stroke="#F4F7FC" stroke-width="2"/>
+<text x="60" y="90" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="60" font-weight="700">AWS Redis Observability</text>
+<text x="60" y="136" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="31" font-weight="400">Kind fora da AWS • descoberta automática • Vault • exporters • Prometheus</text>
+<text x="2540" y="80" fill="#51647E" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="400">Arquitetura • 26/10/2026</text>
+<rect x="60" y="190" width="1180" height="1610" rx="18" fill="#FFFFFF" stroke="#1672CF" stroke-width="2"/>
+<text x="85" y="242" fill="#1672CF" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="700">1  Ambiente local • Rocky Linux</text>
+<rect x="1280" y="190" width="700" height="1610" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<text x="1305" y="242" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="700">2  Descoberta e reconciliação</text>
+<rect x="2020" y="190" width="1120" height="1610" rx="18" fill="#FFFFFF" stroke="#D77913" stroke-width="2"/>
+<text x="2045" y="242" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="700">3  AWS • conta 762012032320</text>
+<text x="90" y="284" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="400">VM 192.168.3.55 • Docker • controle e coleta no ambiente local</text>
+<rect x="100" y="310" width="520" height="145" rx="18" fill="#FFFFFF" stroke="#1672CF" stroke-width="2"/>
+<rect x="118" y="328" width="55" height="46" rx="10" fill="#1672CF" stroke="#1672CF" stroke-width="2"/>
+<text x="125" y="353" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">TF</text>
+<text x="188" y="355" fill="#1672CF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">Terraform</text>
+<text x="122" y="397" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">vault-lab • network-identity • network-link</text>
+<text x="122" y="427" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">ON/OFF • IAM • objetos K8s • estados</text>
+<rect x="650" y="310" width="550" height="145" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<rect x="668" y="328" width="55" height="46" rx="10" fill="#7551C4" stroke="#7551C4" stroke-width="2"/>
+<text x="675" y="353" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">PY</text>
+<text x="738" y="355" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">Timer regional na VM</text>
+<text x="672" y="397" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">redis-regions.timer / service</text>
+<text x="672" y="427" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">automatic_regions.py • status.json</text>
+<rect x="100" y="505" width="1100" height="1120" rx="18" fill="#F1F7FF" stroke="#1672CF" stroke-width="2"/>
+<text x="125" y="551" fill="#1672CF" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">Kind: redis-monitoring  |  control-plane + worker</text>
+<rect x="130" y="585" width="1040" height="645" rx="18" fill="#FFFFFF" stroke="#98BCE6" stroke-width="2"/>
+<text x="150" y="625" fill="#1672CF" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">Namespace redis-vault-lab</text>
+<rect x="165" y="655" width="435" height="135" rx="18" fill="#FFFFFF" stroke="#1672CF" stroke-width="2"/>
+<text x="187" y="700" fill="#1672CF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">CronJob → Job → Pod Python</text>
+<text x="187" y="742" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">discovery • execução a cada minuto</text>
+<text x="187" y="772" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">APIs AWS • validação • reconciliação</text>
+<rect x="650" y="655" width="485" height="135" rx="18" fill="#FFFFFF" stroke="#1672CF" stroke-width="2"/>
+<text x="672" y="700" fill="#1672CF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">Configuração e identidade</text>
+<text x="672" y="742" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">ConfigMaps • ServiceAccount • RBAC</text>
+<text x="672" y="772" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Secret X.509 + aws_signing_helper</text>
+<rect x="165" y="870" width="285" height="160" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<text x="187" y="915" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">Vault + PVC</text>
+<text x="187" y="957" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">K8s auth • KV-v2</text>
+<text x="187" y="987" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">TLS 8200 • vault-data</text>
+<text x="187" y="1017" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">KV persistente no PVC</text>
+<rect x="500" y="870" width="280" height="160" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<text x="522" y="915" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">Secret Redis</text>
+<text x="522" y="957" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">exporter-credentials</text>
+<text x="522" y="987" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Mapa por endpoint</text>
+<text x="522" y="1017" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Volume de leitura</text>
+<rect x="840" y="870" width="295" height="160" rx="18" fill="#FFFFFF" stroke="#12835E" stroke-width="2"/>
+<text x="862" y="915" fill="#12835E" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">exporter-auth</text>
+<text x="862" y="957" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Deployment + Service</text>
+<text x="862" y="987" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">9121 • senha via Secret</text>
+<text x="862" y="1017" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Sidecar: reload + ack</text>
+<rect x="840" y="1080" width="295" height="125" rx="18" fill="#FFFFFF" stroke="#12835E" stroke-width="2"/>
+<text x="862" y="1125" fill="#12835E" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">exporter-noauth</text>
+<text x="862" y="1167" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Deployment + Service</text>
+<text x="862" y="1197" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">9121 • sem senha</text>
+<rect x="165" y="1080" width="600" height="125" rx="18" fill="#FFFFFF" stroke="#1672CF" stroke-width="2"/>
+<text x="187" y="1125" fill="#1672CF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">ScrapeConfigs dinâmicos</text>
+<text x="187" y="1167" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Alvos por nó/endpoint • labels de negócio</text>
+<text x="187" y="1197" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Criação, atualização e remoção segura</text>
+<rect x="130" y="1275" width="1040" height="310" rx="18" fill="#EDF7F4" stroke="#8AC5AC" stroke-width="2"/>
+<text x="150" y="1317" fill="#12835E" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">Namespace monitoring</text>
+<rect x="165" y="1365" width="350" height="150" rx="18" fill="#FFFFFF" stroke="#1672CF" stroke-width="2"/>
+<text x="187" y="1410" fill="#1672CF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">Prometheus Operator</text>
+<text x="187" y="1452" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Observa os ScrapeConfigs</text>
+<text x="187" y="1482" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Atualiza a configuração</text>
+<rect x="650" y="1365" width="485" height="150" rx="18" fill="#FFFFFF" stroke="#12835E" stroke-width="2"/>
+<text x="672" y="1410" fill="#12835E" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">Prometheus local</text>
+<text x="672" y="1452" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Pull das métricas via exporter</text>
+<text x="672" y="1482" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">redis_up • memória • clientes</text>
+<rect x="650" y="1530" width="485" height="45" rx="10" fill="#FFFFFF" stroke="#12835E" stroke-width="2"/>
+<text x="670" y="1558" fill="#12835E" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Grafana configurado no Helm</text>
+<text x="165" y="1560" fill="#51647E" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400">Alertmanager desabilitado (Helm)</text>
+<polyline points="1090,1530 1090,1515" fill="none" stroke="#12835E" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1090,1515 1097.0,1529.0 1083.0,1529.0" fill="#12835E"/>
+<rect x="130" y="1660" width="1070" height="105" rx="18" fill="#FFFFFF" stroke="#12835E" stroke-width="2"/>
+<text x="152" y="1707" fill="#12835E" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">WireGuard da VM • interface wg0</text>
+<text x="152" y="1747" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Rede dos Pods → host Rocky → túnel privado para a EC2</text>
+<rect x="1310" y="300" width="640" height="135" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<text x="1332" y="347" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">1. Regiões habilitadas</text>
+<text x="1332" y="387" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Timer: ~5 min após terminar cada ciclo</text>
+<text x="1332" y="417" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Conta autorizada • regiões descobertas</text>
+<polyline points="1630,435 1630,465" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1630,465 1623.0,451.0 1637.0,451.0" fill="#7551C4"/>
+<rect x="1310" y="470" width="640" height="135" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<text x="1332" y="517" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">2. Inventário completo</text>
+<text x="1332" y="557" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Todos os Redis/Valkey, com e sem tags</text>
+<text x="1332" y="587" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">status.json • não é métrica Prometheus</text>
+<polyline points="1630,605 1630,635" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1630,635 1623.0,621.0 1637.0,621.0" fill="#7551C4"/>
+<rect x="1310" y="640" width="640" height="135" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<text x="1332" y="687" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">3. Autorizar novas conexões</text>
+<text x="1332" y="727" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Tag: RedisObservability=vault-lab</text>
+<text x="1332" y="757" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Terraform: peering, rotas, SG e SSM</text>
+<polyline points="1630,775 1630,805" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1630,805 1623.0,791.0 1637.0,791.0" fill="#7551C4"/>
+<rect x="1310" y="810" width="640" height="135" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<text x="1332" y="857" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">4. Executar o Pod discovery</text>
+<text x="1332" y="897" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">CronJob 1 min → Job → Pod Python</text>
+<text x="1332" y="927" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Endpoints, nós, AZs e tags pelas APIs</text>
+<polyline points="1630,945 1630,975" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1630,975 1623.0,961.0 1637.0,961.0" fill="#7551C4"/>
+<rect x="1310" y="980" width="640" height="135" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<text x="1332" y="1027" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">5. Validar credencial e alvo</text>
+<text x="1332" y="1067" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Vault → Secret → reload confirmado</text>
+<text x="1332" y="1097" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">DNS + TLS + AUTH/PING + exporter</text>
+<polyline points="1630,1115 1630,1145" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1630,1145 1623.0,1131.0 1637.0,1131.0" fill="#7551C4"/>
+<rect x="1310" y="1150" width="640" height="135" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<text x="1332" y="1197" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">6. Reconciliar monitoramento</text>
+<text x="1332" y="1237" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">ScrapeConfigs → Operator → Prometheus</text>
+<text x="1332" y="1267" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Preserva alvos em falhas e inventário parcial</text>
+<polyline points="1630,1285 1630,1315" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1630,1315 1623.0,1301.0 1637.0,1301.0" fill="#7551C4"/>
+<rect x="1310" y="1320" width="640" height="135" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<text x="1332" y="1367" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">7. Coletar métricas reais</text>
+<text x="1332" y="1407" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Prometheus → exporter → Redis</text>
+<text x="1332" y="1437" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">redis_up=1 confirma consulta ao Redis</text>
+<polyline points="1630,1455 1630,1485" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1630,1485 1623.0,1471.0 1637.0,1471.0" fill="#7551C4"/>
+<rect x="1310" y="1490" width="640" height="135" rx="18" fill="#FFFFFF" stroke="#7551C4" stroke-width="2"/>
+<text x="1332" y="1537" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">8. Atualizar e remover</text>
+<text x="1332" y="1577" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Tags de negócio viram labels</text>
+<text x="1332" y="1607" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Exclusão exige observações confirmadas</text>
+<text x="2050" y="294" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">Identidade e APIs • HTTPS 443</text>
+<rect x="2070" y="330" width="470" height="155" rx="18" fill="#FFFFFF" stroke="#D77913" stroke-width="2"/>
+<rect x="2088" y="348" width="55" height="46" rx="10" fill="#D77913" stroke="#D77913" stroke-width="2"/>
+<text x="2095" y="373" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">IAM</text>
+<text x="2158" y="375" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">IAM Roles Anywhere</text>
+<text x="2092" y="417" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Certificado X.509</text>
+<text x="2092" y="447" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Trust Anchor + Profile</text>
+<text x="2092" y="477" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Identidade de máquina</text>
+<rect x="2595" y="330" width="500" height="155" rx="18" fill="#FFFFFF" stroke="#D77913" stroke-width="2"/>
+<text x="2617" y="375" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">Role de descoberta</text>
+<text x="2617" y="417" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">RedisObservabilityDiscoveryRole</text>
+<text x="2617" y="447" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Leitura de inventário e tags</text>
+<text x="2617" y="477" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Usada pelo Pod Python</text>
+<rect x="2070" y="540" width="470" height="130" rx="18" fill="#FFFFFF" stroke="#D77913" stroke-width="2"/>
+<rect x="2088" y="558" width="55" height="46" rx="10" fill="#D77913" stroke="#D77913" stroke-width="2"/>
+<text x="2095" y="583" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">STS</text>
+<text x="2158" y="585" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">AWS STS</text>
+<text x="2092" y="627" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Credenciais temporárias</text>
+<text x="2092" y="657" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">AssumeRole quando autorizado</text>
+<rect x="2595" y="540" width="500" height="155" rx="18" fill="#FFFFFF" stroke="#D77913" stroke-width="2"/>
+<text x="2617" y="585" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="700">Role da automação de rede</text>
+<text x="2617" y="627" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">RedisObservabilityNetworkAutomationRole</text>
+<text x="2617" y="657" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Peering, rotas, regras e SSM</text>
+<text x="2617" y="687" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Identidade separada da descoberta</text>
+<rect x="2070" y="750" width="1025" height="130" rx="18" fill="#FFFFFF" stroke="#D77913" stroke-width="2"/>
+<rect x="2088" y="768" width="55" height="46" rx="10" fill="#D77913" stroke="#D77913" stroke-width="2"/>
+<text x="2095" y="793" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">API</text>
+<text x="2158" y="798" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">APIs AWS • plano de controle</text>
+<text x="2092" y="837" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">ElastiCache: caches, grupos, nós, endpoints e tags</text>
+<text x="2092" y="867" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">EC2: regiões e rede • SSM: configura somente o gateway</text>
+<rect x="2050" y="920" width="1060" height="835" rx="18" fill="#FFF9EF" stroke="#E8BA79" stroke-width="2"/>
+<text x="2070" y="963" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Rede privada • VPC central us-east-1</text>
+<rect x="2080" y="995" width="990" height="145" rx="18" fill="#FFFFFF" stroke="#12835E" stroke-width="2"/>
+<rect x="2098" y="1013" width="55" height="46" rx="10" fill="#12835E" stroke="#12835E" stroke-width="2"/>
+<text x="2105" y="1038" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">EC2</text>
+<text x="2168" y="1044" fill="#12835E" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">EC2 WireGuard • gateway central</text>
+<text x="2102" y="1082" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">i-0f18f326bfde065db • VPC 10.80.0.0/16</text>
+<text x="2102" y="1112" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Encaminhamento IPv4 + SNAT • rotas e security groups</text>
+<rect x="2080" y="1200" width="990" height="130" rx="18" fill="#FFFFFF" stroke="#12835E" stroke-width="2"/>
+<rect x="2098" y="1218" width="55" height="46" rx="10" fill="#12835E" stroke="#12835E" stroke-width="2"/>
+<text x="2105" y="1243" fill="#FFFFFF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">DB</text>
+<text x="2168" y="1249" fill="#12835E" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">ElastiCache • Redis / Valkey</text>
+<text x="2102" y="1287" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Caches da VPC central • conexão direta pela rede privada</text>
+<text x="2102" y="1317" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">TLS 6379 • AUTH quando configurado • nós e AZs</text>
+<rect x="2080" y="1400" width="990" height="115" rx="18" fill="#FFFFFF" stroke="#D77913" stroke-width="2" stroke-dasharray="12 8"/>
+<text x="2102" y="1447" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="27" font-weight="700">VPC Peering direto • rotas • regras TCP 6379</text>
+<text x="2102" y="1487" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Terraform por VPC • retorno /32 para o gateway com SNAT</text>
+<rect x="2080" y="1580" width="990" height="135" rx="18" fill="#FFFFFF" stroke="#D77913" stroke-width="2" stroke-dasharray="12 8"/>
+<text x="2102" y="1629" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">ElastiCache em outras VPCs / regiões</text>
+<text x="2102" y="1667" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Exemplos: Canadá, Mumbai e São Paulo • CIDRs sem conflito</text>
+<text x="2102" y="1697" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Conectividade e coleta inter-regional: a homologar</text>
+<polyline points="360,455 360,505" fill="none" stroke="#1672CF" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="360,505 353.0,491.0 367.0,491.0" fill="#1672CF"/>
+<polyline points="650,385 620,385" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="620,385 634.0,378.0 634.0,392.0" fill="#7551C4"/>
+<polyline points="925,455 925,485 1220,485 1220,625 1120,625 1120,655" fill="none" stroke="#1672CF" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1120,655 1113.0,641.0 1127.0,641.0" fill="#1672CF"/>
+<text x="920" y="620" fill="#1672CF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400">publica escopo</text>
+<polyline points="650,720 600,720" fill="none" stroke="#7C8AA1" stroke-width="4" stroke-linejoin="round" stroke-dasharray="12 8"/>
+<polygon points="600,720 614.0,713.0 614.0,727.0" fill="#7C8AA1"/>
+<polyline points="300,790 300,870" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="300,870 293.0,856.0 307.0,856.0" fill="#7551C4"/>
+<text x="175" y="836" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="400">JWT + TLS • lê KV</text>
+<polyline points="550,790 550,870" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="550,870 543.0,856.0 557.0,856.0" fill="#7551C4"/>
+<text x="475" y="836" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="400">publica</text>
+<polyline points="780,910 840,910" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="840,910 826.0,917.0 826.0,903.0" fill="#7551C4"/>
+<polyline points="180,790 145,790 145,1050 250,1050 250,1080" fill="none" stroke="#1672CF" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="250,1080 243.0,1066.0 257.0,1066.0" fill="#1672CF"/>
+<polyline points="340,1205 340,1365" fill="none" stroke="#1672CF" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="340,1365 333.0,1351.0 347.0,1351.0" fill="#1672CF"/>
+<polyline points="515,1440 650,1440" fill="none" stroke="#1672CF" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="650,1440 636.0,1447.0 636.0,1433.0" fill="#1672CF"/>
+<polyline points="805,1365 805,985 840,985" fill="none" stroke="#12835E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="840,985 826.0,992.0 826.0,978.0" fill="#12835E"/>
+<polyline points="805,1140 840,1140" fill="none" stroke="#12835E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="840,1140 826.0,1147.0 826.0,1133.0" fill="#12835E"/>
+<text x="650" y="1261" fill="#12835E" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="400">HTTP /scrape :9121</text>
+<polyline points="1135,990 1153,990 1153,1640 1030,1640 1030,1660" fill="none" stroke="#12835E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1030,1660 1023.0,1646.0 1037.0,1646.0" fill="#12835E"/>
+<polyline points="1135,1140 1153,1140" fill="none" stroke="#12835E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="1153,1140 1139.0,1147.0 1139.0,1133.0" fill="#12835E"/>
+<polyline points="2305,485 2305,540" fill="none" stroke="#D77913" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="2305,540 2298.0,526.0 2312.0,526.0" fill="#D77913"/>
+<polyline points="2540,600 2570,600 2570,410 2595,410" fill="none" stroke="#D77913" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="2595,410 2581.0,417.0 2581.0,403.0" fill="#D77913"/>
+<polyline points="2540,615 2595,615" fill="none" stroke="#D77913" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="2595,615 2581.0,622.0 2581.0,608.0" fill="#D77913"/>
+<polyline points="2845,485 3115,485 3115,725 2845,725 2845,750" fill="none" stroke="#1672CF" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="2845,750 2838.0,736.0 2852.0,736.0" fill="#1672CF"/>
+<polyline points="2845,695 2845,750" fill="none" stroke="#D77913" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="2845,750 2838.0,736.0 2852.0,736.0" fill="#D77913"/>
+<polyline points="1180,310 1180,180 1995,180 1995,405 2070,405" fill="none" stroke="#D77913" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="2070,405 2056.0,412.0 2056.0,398.0" fill="#D77913"/>
+<text x="1288" y="168" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400">X.509 → credenciais temporárias AWS</text>
+<polyline points="600,735 620,735 620,825 1255,825 1255,790 2008,790 2008,815 2070,815" fill="none" stroke="#1672CF" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="2070,815 2056.0,822.0 2056.0,808.0" fill="#1672CF"/>
+<text x="650" y="853" fill="#1672CF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400">Pod → AWS • HTTPS 443</text>
+<polyline points="1200,1715 1997,1715 1997,1060 2080,1060" fill="none" stroke="#12835E" stroke-width="5" stroke-linejoin="round"/>
+<polygon points="2080,1060 2066.0,1067.0 2066.0,1053.0" fill="#12835E"/>
+<text x="1305" y="1761" fill="#12835E" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="400">WireGuard UDP • Redis TLS encapsulado</text>
+<polyline points="2575,1140 2575,1200" fill="none" stroke="#12835E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="2575,1200 2568.0,1186.0 2582.0,1186.0" fill="#12835E"/>
+<polyline points="3070,1060 3095,1060 3095,1457 3070,1457" fill="none" stroke="#D77913" stroke-width="4" stroke-linejoin="round" stroke-dasharray="12 8"/>
+<polygon points="3070,1457 3084.0,1450.0 3084.0,1464.0" fill="#D77913"/>
+<polyline points="2575,1515 2575,1580" fill="none" stroke="#D77913" stroke-width="4" stroke-linejoin="round" stroke-dasharray="12 8"/>
+<polygon points="2575,1580 2568.0,1566.0 2582.0,1566.0" fill="#D77913"/>
+<rect x="60" y="1840" width="1140" height="270" rx="18" fill="#FFFFFF" stroke="#D5DFEB" stroke-width="2"/>
+<text x="85" y="1889" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">Como ler as setas</text>
+<polyline points="90,1934 165,1934" fill="none" stroke="#1672CF" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="165,1934 151.0,1941.0 151.0,1927.0" fill="#1672CF"/>
+<text x="185" y="1944" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="400">Controle: descoberta e ScrapeConfigs</text>
+<polyline points="90,1974 165,1974" fill="none" stroke="#7551C4" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="165,1974 151.0,1981.0 151.0,1967.0" fill="#7551C4"/>
+<text x="185" y="1984" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="400">Credenciais: Vault, Secret e reload</text>
+<polyline points="90,2014 165,2014" fill="none" stroke="#12835E" stroke-width="4" stroke-linejoin="round"/>
+<polygon points="165,2014 151.0,2021.0 151.0,2007.0" fill="#12835E"/>
+<text x="185" y="2024" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="400">Coleta: solicitações; respostas pelo mesmo caminho</text>
+<polyline points="90,2054 165,2054" fill="none" stroke="#D77913" stroke-width="4" stroke-linejoin="round" stroke-dasharray="12 8"/>
+<polygon points="165,2054 151.0,2061.0 151.0,2047.0" fill="#D77913"/>
+<text x="185" y="2064" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="400">Extensão implementada, ainda sem homologação real</text>
+<rect x="1230" y="1840" width="750" height="270" rx="18" fill="#F3F0FB" stroke="#B5A4D8" stroke-width="2"/>
+<text x="1255" y="1889" fill="#7551C4" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">Escopo e evidências</text>
+<text x="1255" y="1938" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="400">Validado: coleta real em us-east-1.</text>
+<text x="1255" y="1971" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="400">Inventário: 17 regiões, com e sem tags.</text>
+<text x="1255" y="2004" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="400">Inventário não confirma coleta nem redis_up.</text>
+<text x="1255" y="2037" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="400">A homologar: rede/coleta inter-regional,</text>
+<text x="1255" y="2070" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="400">multiaccount e failover Multi-AZ.</text>
+<rect x="2020" y="1840" width="1120" height="270" rx="18" fill="#FFF9EF" stroke="#E8BA79" stroke-width="2"/>
+<text x="2045" y="1889" fill="#D77913" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">Estado salvo e componentes históricos</text>
+<text x="2045" y="1938" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="400">Diagrama do fluxo ON; último checkpoint 23/10: OFF.</text>
+<text x="2045" y="1971" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="400">Caches de teste removidos • EC2s paradas • PVC preservado.</text>
+<text x="2045" y="2004" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="400">ECS/Fargate e AMP não integram a coleta atual.</text>
+<text x="2045" y="2037" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="400">Discos, Elastic IP e histórico AMP foram preservados.</text>
+<text x="2045" y="2070" fill="#172B49" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="400">Sem AWS Client VPN, NAT Gateway ou Transit Gateway.</text>
+<text x="60" y="2152" fill="#51647E" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="400">Fonte: código Terraform/Python e evidências do repositório • Sem senhas ou chaves no diagrama • Arquitetura funcional, não inventário ao vivo</text>
+</svg>

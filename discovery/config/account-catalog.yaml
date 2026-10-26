@@ -1,0 +1,18 @@
+# All ACTIVE accounts in the authorized OU are admitted automatically.
+# No per-account IDs, Redis endpoints or credentials in this catalog.
+source: organizations
+vault_scope: project  # Read-only KV prefix redis-observability; no root token in the runtime.
+defaults:
+  central_account_id: '762012032320'
+  discovery_profile: redis-discovery
+  network_profile: redis-network-automation
+  member_role_name: RedisObservabilityOUDiscoveryRole
+  regions: auto
+organizations:
+  reader_account_id: '762012032320'
+  reader_role_arn: arn:aws:iam::762012032320:role/RedisObservabilityOrganizationReader
+  expected_organization_id: o-nipxlggd11
+  ou_ids:
+    - ou-m28r-4zfxlwec
+  recursive: true
+exclude_account_ids: []

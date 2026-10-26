@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-23",
+  "host": "192.168.3.55",
+  "context": "kind-redis-monitoring",
+  "namespace": "redis-vault-lab",
+  "unit_tests_passed": 67,
+  "terraform_validate": true,
+  "terraform_on": true,
+  "terraform_off": true,
+  "terraform_on_after_off": true,
+  "authenticated_exporter_replicas_tested": 2,
+  "all_replicas_acknowledged_secret_generation": true,
+  "aws_inventory_api_reached": true,
+  "vault_kubernetes_login_reached": true,
+  "redis_tcp_from_host": "timeout",
+  "redis_endpoint_ip": "10.80.20.220",
+  "redis_port": 6379,
+  "new_redis_up_acceptance": false,
+  "new_aws_resources_created": false,
+  "final_state": {
+    "vault_replicas": 0,
+    "exporter_auth_replicas": 0,
+    "exporter_noauth_replicas": 0,
+    "discovery_suspended": true,
+    "active_jobs": 0,
+    "owned_scrapeconfigs": 0,
+    "pvc": "Bound"
+  }
+}

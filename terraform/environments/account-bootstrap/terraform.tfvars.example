@@ -1,0 +1,8 @@
+# Use the real second account; this example is not executable unchanged.
+member_profile    = "member-admin"
+member_account_id = "REPLACE_WITH_REAL_ACCOUNT"
+trusted_principal_arns = [
+  "arn:aws:iam::762012032320:role/RedisObservabilityDiscoveryRole",
+  "arn:aws:iam::762012032320:role/RedisObservabilityNetworkAutomationRole"
+]
+# organization_id = "o-REAL_ORGANIZATION" # Only if the accounts really share an Organization.

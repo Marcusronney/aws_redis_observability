@@ -1,0 +1,11 @@
+account_id = "417140778338"
+region = "us-east-2"
+name = "redis-tf-conta03"
+vpc_id = "vpc-0eb4dd042c1502ec25"
+subnet_ids = ["subnet-06e92fc3ad03fe93d", "subnet-0b454d3cd5ce1faa1"]
+project = "redis-observability"
+environment = "lab"
+cost_center = "manual-test"
+replicas = 0
+# Lab without AUTH; TLS is always enabled. For AUTH, set true and use TF_VAR_auth_token.
+auth_enabled = false

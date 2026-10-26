@@ -122,6 +122,7 @@ data "aws_iam_policy_document" "discovery_permissions" {
 
     actions = [
       "elasticache:DescribeCacheClusters",
+      "elasticache:DescribeCacheSubnetGroups",
       "elasticache:DescribeReplicationGroups",
       "elasticache:DescribeServerlessCaches",
       "elasticache:ListTagsForResource"

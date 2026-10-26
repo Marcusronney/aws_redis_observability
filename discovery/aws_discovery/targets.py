@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def select_targets(inventory):
+def select_targets(inventory, collect_nodes=False):
     if inventory.get("errors"):
         raise ValueError(
             "Inventario AWS incompleto. "
@@ -37,6 +37,25 @@ def select_targets(inventory):
 
 
             for resource in resources:
+
+                if resource.get('type') == 'cluster' and not resource.get('replication_group_id'):
+                    if resource.get('status') != 'available' or resource.get('engine') not in ('redis', 'valkey'):
+                        continue
+                    endpoint = next((e for e in resource.get('endpoints', []) if e.get('role') == 'node'), None)
+                    if not endpoint:
+                        continue
+                    identifier = f"{account_id}:{region_name}:cluster:{resource['id']}"
+                    if identifier in seen:
+                        raise ValueError('Duplicate standalone Redis identity')
+                    seen.add(identifier)
+                    targets.append({
+                        'id': identifier, 'account_id': account_id, 'region': region_name,
+                        'replication_group_id': resource['id'], 'engine': resource['engine'],
+                        'endpoint': f"{endpoint['address']}:{endpoint['port']}", 'endpoint_role': 'node',
+                        'aws_resource_type': 'cluster', 'vpc_id': resource.get('vpc_id'),
+                        'tags': resource.get('tags', {}), 'tls': resource.get('transit_encryption'),
+                        'auth_required': resource.get('auth_token_enabled'), 'labels': resource.get('labels', {})})
+                    continue
 
                 # ElastiCache Serverless (Redis / Valkey)
                 if resource.get("type") == "serverless":
@@ -107,7 +126,7 @@ def select_targets(inventory):
 
                 # Cluster mode habilitado exige outra
                 # estrategia de coleta.
-                if resource.get("cluster_enabled") is not False:
+                if resource.get("cluster_enabled") is not False and not (collect_nodes and resource.get('cluster_enabled') is True):
                     continue
 
                 primary = next(
@@ -122,7 +141,7 @@ def select_targets(inventory):
                     None,
                 )
 
-                if not primary:
+                if not primary and not (collect_nodes and resource.get('nodes')):
                     continue
 
                 member_ids = resource.get(
@@ -145,6 +164,28 @@ def select_targets(inventory):
                 engine = member_engines.pop()
 
                 if engine not in ("redis", "valkey"):
+                    continue
+
+                if collect_nodes and resource.get('nodes'):
+                    for node in resource['nodes']:
+                        if not node.get('endpoint'):
+                            raise ValueError('Incomplete Redis node endpoint inventory')
+                        identifier = (f"{account_id}:{region_name}:{resource['id']}:"
+                                      f"node/{node['cluster_id']}/{node['node_id']}")
+                        if identifier in seen:
+                            raise ValueError('Duplicate Redis node identity')
+                        seen.add(identifier)
+                        targets.append({
+                            'id': identifier, 'account_id': account_id, 'region': region_name,
+                            'replication_group_id': resource['id'], 'engine': engine,
+                            'endpoint': f"{node['endpoint']['address']}:{node['endpoint']['port']}",
+                            'endpoint_role': node['role'], 'endpoint_kind': 'node',
+                            'aws_resource_type': 'replication_group',
+                            'vpc_id': resource.get('vpc_id'), 'tags': resource.get('tags', {}),
+                            'tls': resource.get('transit_encryption'), 'auth_required': replication_auth(resource),
+                            'labels': {**resource.get('labels', {}), 'availability_zone': node['availability_zone'],
+                                       'redis_node': node['cluster_id'] + '/' + node['node_id'],
+                                       'redis_shard': node['shard_id'], 'redis_role': node['role']}})
                     continue
 
                 identifier = (
@@ -172,19 +213,25 @@ def select_targets(inventory):
                     "endpoint": endpoint,
                     "endpoint_role": "primary",
                     "aws_resource_type": "replication_group",
+                    "vpc_id": resource.get("vpc_id"),
                     "tags": resource.get("tags", {}),
                     "tls": resource.get(
                         "transit_encryption"
                     ),
-                    "auth_required": resource.get(
-                        "auth_token_enabled"
-                    ),
+                    "auth_required": replication_auth(resource),
                     "labels": resource.get(
                         "labels", {}
                     ),
                 })
 
     return sorted(targets, key=lambda t: t["id"])
+
+
+def replication_auth(resource):
+    # AuthTokenEnabled=False does not mean noauth when RBAC user groups exist.
+    if resource.get('user_group_ids'):
+        return True if resource.get('tags', {}).get('RedisObservabilityAuth') == 'secret' else None
+    return resource.get('auth_token_enabled')
 
 
 def serverless_auth(resource):

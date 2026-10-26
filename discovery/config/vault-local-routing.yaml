@@ -1,0 +1,32 @@
+# Routing is authorized by network and tag, never by a manually entered endpoint.
+allowed_accounts: ['762012032320']
+local_targets: []
+blocked_targets: []
+local_networks:
+  - name: wireguard-existing-project
+    enabled: true
+    account_id: '762012032320'
+    region: us-east-1
+    vpc_id: vpc-086678957273bf941
+    destination_cidrs: [10.80.0.0/16]
+    required_tags:
+      project: aws-redis-observability
+    allow_authenticated: true
+  - name: wireguard-existing-project-uppercase
+    enabled: true
+    account_id: '762012032320'
+    region: us-east-1
+    vpc_id: vpc-086678957273bf941
+    destination_cidrs: [10.80.0.0/16]
+    required_tags:
+      Project: aws-redis-observability
+    allow_authenticated: true
+  - name: temporary-lifecycle-tests
+    enabled: true
+    account_id: '762012032320'
+    region: us-east-1
+    vpc_id: vpc-086678957273bf941
+    destination_cidrs: [10.80.0.0/16]
+    required_tags:
+      RedisObservability: vault-lab
+    allow_authenticated: true

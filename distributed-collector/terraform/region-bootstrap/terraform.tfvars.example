@@ -1,6 +1,0 @@
-region                   = "sa-east-1"
-aws_profile              = "redis-observability-admin"
-workspace_arn            = "arn:aws:aps:us-east-1:762012032320:workspace/ws-REPLACE_ME"
-controller_principal_arn = "arn:aws:iam::762012032320:role/RedisObservabilityDiscoveryRole"
-# Add only if the central role's trust/policy supports it.
-credential_secret_arns = []

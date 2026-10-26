@@ -1,0 +1,15 @@
+# Example only: replace the second ID after creating the account and bootstrapping IAM.
+source: explicit
+vault_scope: project
+defaults:
+  central_account_id: '762012032320'
+  discovery_profile: redis-discovery
+  network_profile: redis-network-automation
+  member_role_name: RedisObservabilityMemberDiscoveryRole
+  regions: auto
+accounts:
+  - name: estudos
+    account_id: '762012032320'
+  - name: segunda-conta
+    account_id: 'REPLACE_WITH_REAL_SECOND_ACCOUNT'
+exclude_account_ids: []

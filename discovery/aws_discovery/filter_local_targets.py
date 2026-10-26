@@ -44,9 +44,9 @@ def filter_targets(document, policy, probe=check_private_route):
     seen = set()
     for target in document["targets"]:
         account, region = str(target["account_id"]), target["region"]
-        kind = target.get("labels", {}).get("aws_resource_type", "replication_group")
+        kind = target.get("aws_resource_type", target.get("labels", {}).get("aws_resource_type", "replication_group"))
         # No targets.py, replication groups nao possuem sufixo :replication_group no id.
-        kind = kind if kind == "serverless" else "replication_group"
+        kind = kind if kind in ("serverless", "cluster") else "replication_group"
         name = target["replication_group_id"]
         identifier = f"{account}:{region}:{kind}:{name}"
         if account not in allowed or identifier in blocked:
@@ -62,18 +62,28 @@ def filter_targets(document, policy, probe=check_private_route):
                 required = route.get("required_tags", {})
                 if not required or not all(target.get("tags", {}).get(k) == v for k, v in required.items()):
                     continue
+                if type(target.get("auth_required")) is not bool and policy.get('isolate_pending_targets'):
+                    print('TARGET_PENDING: authentication mode not confirmed id=' + target['id'], flush=True)
+                    continue
                 if type(target.get("auth_required")) is not bool:
                     raise ValueError(f"Authentication not confirmed: {identifier}")
                 # Pilot only enables noauth. Authenticated routing requires a
                 # separately homologated Vault -> Secret -> exporter mapping.
                 if target["auth_required"] and route.get("allow_authenticated") is not True:
                     continue
-                probe(target, route)
+                try:
+                    probe(target, route)
+                except Exception:
+                    if not policy.get('isolate_pending_targets'):
+                        raise
+                    print('TARGET_PENDING: private connectivity not confirmed id=' + target['id'], flush=True)
+                    continue
                 matched = True
                 break
-        if matched and identifier not in seen:
+        node_identity = target.get('id', identifier)
+        if matched and node_identity not in seen:
             selected.append(target)
-            seen.add(identifier)
+            seen.add(node_identity)
     return {"mode": "targets-dry-run", "target_count": len(selected), "targets": selected}
 
 

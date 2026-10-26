@@ -1,0 +1,218 @@
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata: {name: vault, namespace: '${namespace}'}
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata: {name: discovery, namespace: '${namespace}'}
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata: {name: '${namespace}-reviewer'}
+  roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: system:auth-delegator}
+  subjects: [{kind: ServiceAccount, name: vault, namespace: '${namespace}'}]
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata: {name: discovery, namespace: '${namespace}'}
+  rules:
+  - apiGroups: ['']
+    resources: [pods]
+    verbs: [get, list]
+  - apiGroups: ['']
+    resources: [secrets]
+    resourceNames: [exporter-credentials]
+    verbs: [get, update]
+  - apiGroups: ['']
+    resources: [configmaps]
+    resourceNames: [discovery-state]
+    verbs: [get, update]
+  - apiGroups: [coordination.k8s.io]
+    resources: [leases]
+    resourceNames: [discovery]
+    verbs: [get, update]
+  - apiGroups: [monitoring.coreos.com]
+    resources: [scrapeconfigs]
+    verbs: [get, list, create, patch, delete]
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata: {name: discovery, namespace: '${namespace}'}
+  roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: discovery}
+  subjects: [{kind: ServiceAccount, name: discovery, namespace: '${namespace}'}]
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata: {name: vault-data, namespace: '${namespace}'}
+  spec:
+    accessModes: [ReadWriteOnce]
+    storageClassName: standard
+    resources: {requests: {storage: 1Gi}}
+- apiVersion: v1
+  kind: ConfigMap
+  metadata: {name: vault-config, namespace: '${namespace}'}
+  data:
+    vault.hcl: |
+      ui = false
+      disable_mlock = true
+      api_addr = "https://vault.${namespace}.svc.cluster.local:8200"
+      cluster_addr = "https://vault.${namespace}.svc.cluster.local:8201"
+      storage "raft" { path = "/vault/data" }
+      listener "tcp" {
+        address = "0.0.0.0:8200"
+        tls_cert_file = "/vault/tls/tls.crt"
+        tls_key_file = "/vault/tls/tls.key"
+      }
+- apiVersion: v1
+  kind: Service
+  metadata: {name: vault, namespace: '${namespace}'}
+  spec:
+    selector: {app: vault}
+    ports: [{name: https, port: 8200}]
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata: {name: vault, namespace: '${namespace}'}
+  spec:
+    replicas: ${replicas}
+    strategy: {type: Recreate}
+    selector: {matchLabels: {app: vault}}
+    template:
+      metadata: {labels: {app: vault}}
+      spec:
+        serviceAccountName: vault
+        securityContext: {runAsUser: 100, runAsGroup: 1000, fsGroup: 1000, runAsNonRoot: true}
+        containers:
+        - name: vault
+          image: hashicorp/vault:2.2.0
+          command: [vault, server, '-config=/vault/config/vault.hcl']
+          ports: [{containerPort: 8200}]
+          securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
+          resources: {requests: {cpu: 50m, memory: 128Mi}, limits: {cpu: 500m, memory: 512Mi}}
+          readinessProbe:
+            httpGet: {scheme: HTTPS, port: 8200, path: '/v1/sys/health?sealedcode=200&uninitcode=200'}
+          volumeMounts:
+          - {name: data, mountPath: /vault/data}
+          - {name: config, mountPath: /vault/config, readOnly: true}
+          - {name: tls, mountPath: /vault/tls, readOnly: true}
+        volumes:
+        - {name: data, persistentVolumeClaim: {claimName: vault-data}}
+        - {name: config, configMap: {name: vault-config}}
+        - {name: tls, secret: {secretName: vault-tls}}
+- apiVersion: v1
+  kind: Service
+  metadata: {name: exporter-auth, namespace: '${namespace}'}
+  spec:
+    selector: {app: exporter-auth}
+    ports: [{name: metrics, port: 9121}, {name: reload, port: 9122}]
+- apiVersion: v1
+  kind: Service
+  metadata: {name: exporter-noauth, namespace: '${namespace}'}
+  spec:
+    selector: {app: exporter-noauth}
+    ports: [{name: metrics, port: 9121}]
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata: {name: exporter-auth, namespace: '${namespace}'}
+  spec:
+    replicas: ${exporter_replicas}
+    selector: {matchLabels: {app: exporter-auth}}
+    template:
+      metadata: {labels: {app: exporter-auth}}
+      spec:
+        automountServiceAccountToken: false
+        securityContext: {runAsUser: 10001, runAsGroup: 10001, fsGroup: 10001, runAsNonRoot: true}
+        containers:
+        - name: exporter
+          image: ghcr.io/oliver006/redis_exporter:v1.93.0
+          args: ['--redis.addr=', '--redis.password-file=/etc/redis-credentials/passwords.json']
+          ports: [{containerPort: 9121}]
+          resources: {requests: {cpu: 10m, memory: 32Mi}, limits: {cpu: 250m, memory: 128Mi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          volumeMounts: [{name: credentials, mountPath: /etc/redis-credentials, readOnly: true}]
+        - name: password-reload
+          image: '${controller_image}'
+          imagePullPolicy: IfNotPresent
+          command: [python, '-m', discovery.aws_discovery.password_reload]
+          ports: [{containerPort: 9122}]
+          readinessProbe:
+            httpGet: {path: '/', port: 9122}
+            periodSeconds: 2
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+          resources: {requests: {cpu: 5m, memory: 24Mi}, limits: {cpu: 100m, memory: 64Mi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          volumeMounts: [{name: credentials, mountPath: /etc/redis-credentials, readOnly: true}]
+        volumes: [{name: credentials, secret: {secretName: exporter-credentials, defaultMode: 288}}]
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata: {name: exporter-noauth, namespace: '${namespace}'}
+  spec:
+    replicas: ${exporter_replicas}
+    selector: {matchLabels: {app: exporter-noauth}}
+    template:
+      metadata: {labels: {app: exporter-noauth}}
+      spec:
+        automountServiceAccountToken: false
+        securityContext: {runAsUser: 10001, runAsGroup: 10001, runAsNonRoot: true}
+        containers:
+        - name: exporter
+          image: ghcr.io/oliver006/redis_exporter:v1.93.0
+          args: ['--redis.addr=']
+          ports: [{containerPort: 9121}]
+          resources: {requests: {cpu: 10m, memory: 32Mi}, limits: {cpu: 250m, memory: 128Mi}}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+- apiVersion: batch/v1
+  kind: CronJob
+  metadata: {name: discovery, namespace: '${namespace}'}
+  spec:
+    schedule: '* * * * *'
+    suspend: ${suspend}
+    concurrencyPolicy: Forbid
+    successfulJobsHistoryLimit: 2
+    failedJobsHistoryLimit: 2
+    jobTemplate:
+      spec:
+        backoffLimit: 0
+        activeDeadlineSeconds: 240
+        ttlSecondsAfterFinished: 1800
+        template:
+          spec:
+            serviceAccountName: discovery
+            restartPolicy: Never
+            securityContext: {runAsUser: 10001, runAsGroup: 10001, fsGroup: 10001, runAsNonRoot: true}
+            containers:
+            - name: discovery
+              image: '${controller_image}'
+              imagePullPolicy: IfNotPresent
+              command: [sh, '-ec']
+              args:
+              - |
+                python -m discovery.aws_discovery --config /etc/discovery/accounts.yaml --resolved-config /tmp/accounts.resolved.yaml > /tmp/inventory.json
+                python -m discovery.aws_discovery.controller --inventory /tmp/inventory.json --accounts /tmp/accounts.resolved.yaml --policy /etc/discovery/policy.yaml --settings /etc/discovery/settings.yaml
+              env:
+              - {name: DISCOVERY_TRACE_PHASES, value: 'true'}
+              - {name: REDIS_AWS_PROFILE, value: redis-discovery-rolesanywhere}
+              - {name: AWS_CONFIG_FILE, value: /etc/aws/config}
+              - {name: AWS_EC2_METADATA_DISABLED, value: 'true'}
+              - {name: VAULT_ADDR, value: 'https://vault.${namespace}.svc.cluster.local:8200'}
+              - {name: VAULT_CACERT, value: /etc/vault-ca/ca.crt}
+              - {name: VAULT_ROLE, value: discovery}
+              - {name: VAULT_JWT_FILE, value: /etc/vault-jwt/token}
+              resources: {requests: {cpu: 25m, memory: 64Mi}, limits: {cpu: 250m, memory: 256Mi}}
+              securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+              volumeMounts:
+              - {name: config, mountPath: /etc/discovery, readOnly: true}
+              - {name: aws, mountPath: /etc/aws, readOnly: true}
+              - {name: certificate, mountPath: /etc/rolesanywhere, readOnly: true}
+              - {name: vault-ca, mountPath: /etc/vault-ca, readOnly: true}
+              - {name: vault-jwt, mountPath: /etc/vault-jwt, readOnly: true}
+              - {name: tmp, mountPath: /tmp}
+            volumes:
+            - {name: config, configMap: {name: discovery-config}}
+            - {name: aws, configMap: {name: aws-config}}
+            - {name: certificate, secret: {secretName: aws-certificate, defaultMode: 288}}
+            - name: vault-ca
+              secret: {secretName: vault-tls, items: [{key: ca.crt, path: ca.crt}]}
+            - name: vault-jwt
+              projected:
+                sources: [{serviceAccountToken: {audience: vault, expirationSeconds: 600, path: token}}]
+            - {name: tmp, emptyDir: {}}

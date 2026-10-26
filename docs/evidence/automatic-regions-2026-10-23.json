@@ -1,0 +1,16 @@
+{
+  "stage": "automatic-regions-deployed",
+  "regions_scanned": 17,
+  "errors": [],
+  "networks": [],
+  "applied": true,
+  "completed_at": 1792783475.487763,
+  "tests_passed_on_vm": 83,
+  "tests_passed_locally": 83,
+  "cross_account_enabled": false,
+  "remote_redis_homologated": false,
+  "network_identity_resources_created": 3,
+  "machine_identity_verified": true,
+  "timer_active": true,
+  "runtime_terraform_apply_exit": 0
+}
