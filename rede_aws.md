@@ -33,7 +33,3 @@ aws sts get-caller-identity \
   --profile redis-observability-admin
 ````
 
-Token auth AWS secure group Cache
-`````
-DASDASDASDNDJASHDASUH#1
-````
